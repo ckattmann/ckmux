@@ -1,0 +1,61 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "config.pack.error.cycleIgnored": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pack cycle ignored."
+          }
+        }
+      }
+    },
+    "config.pack.error.fileMissing": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pack file does not exist."
+          }
+        }
+      }
+    },
+    "config.pack.error.fileSizeUnreadable": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pack file size could not be read."
+          }
+        }
+      }
+    },
+    "config.pack.error.loadLimitExceeded": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pack loading limit exceeded."
+          }
+        }
+      }
+    },
+    "config.pack.error.nestingTooDeep": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pack nesting is too deep."
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}
