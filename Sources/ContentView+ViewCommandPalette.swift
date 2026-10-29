@@ -70,52 +70,12 @@ extension ContentView {
                 || context.bool(CommandPaletteContextKeys.panelIsFilePreviewTextEditor)
         }
 
-        contributions.append(
-            CommandPaletteCommandContribution(
-                commandId: "palette.browserZoomIn",
-                title: constant(String(localized: "command.browserZoomIn.title", defaultValue: "Zoom In")),
-                subtitle: panelSubtitle,
-                keywords: ["browser", "file", "text", "preview", "zoom", "font", "in"],
-                when: browserOrTextPreview
-            )
-        )
-        contributions.append(
-            CommandPaletteCommandContribution(
-                commandId: "palette.browserZoomOut",
-                title: constant(String(localized: "command.browserZoomOut.title", defaultValue: "Zoom Out")),
-                subtitle: panelSubtitle,
-                keywords: ["browser", "file", "text", "preview", "zoom", "font", "out"],
-                when: browserOrTextPreview
-            )
-        )
-        contributions.append(
-            CommandPaletteCommandContribution(
-                commandId: "palette.browserZoomReset",
-                title: constant(String(localized: "command.browserZoomReset.title", defaultValue: "Actual Size")),
-                subtitle: panelSubtitle,
-                keywords: ["browser", "file", "text", "preview", "zoom", "font", "reset", "actual size"],
-                when: browserOrTextPreview
-            )
-        )
     }
 
     static func appendBrowserKeepPageActiveCommandContribution(
         to contributions: inout [CommandPaletteCommandContribution],
         panelSubtitle: @escaping (CommandPaletteContextSnapshot) -> String
     ) {
-        contributions.append(
-            CommandPaletteCommandContribution(
-                commandId: "palette.browserKeepPageActive",
-                title: { context in
-                    context.bool(CommandPaletteContextKeys.panelBrowserKeepsPageActive)
-                        ? String(localized: "command.browserKeepPageActive.disable.title", defaultValue: "Allow Page to Unload While Hidden")
-                        : String(localized: "command.browserKeepPageActive.enable.title", defaultValue: "Keep Page Active While Hidden")
-                },
-                subtitle: panelSubtitle,
-                keywords: ["browser", "keep", "active", "pin", "memory", "unload", "discard", "background", "hidden"],
-                when: { $0.bool(CommandPaletteContextKeys.panelIsBrowser) }
-            )
-        )
     }
 
     func registerViewCommandHandlers(_ registry: inout CommandPaletteHandlerRegistry) {

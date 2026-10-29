@@ -7321,15 +7321,6 @@ struct ContentView: View {
                 keywords: ["create", "new", "workspace"]
             )
         )
-        contributions.append(
-            CommandPaletteCommandContribution(
-                commandId: "palette.newBrowserWorkspace",
-                title: constant(String(localized: "command.newBrowserWorkspace.title", defaultValue: "New Browser Workspace")),
-                subtitle: constant(String(localized: "command.newBrowserWorkspace.subtitle", defaultValue: "Workspace")),
-                keywords: ["create", "new", "browser", "workspace", "web"],
-                when: { !$0.bool(CommandPaletteContextKeys.browserDisabled) }
-            )
-        )
         contributions.append(contentsOf: Self.commandPaletteNewAgentChatContributions())
         contributions.append(
             contentsOf: Self.commandPaletteAgentLauncherContributions(
@@ -7368,25 +7359,6 @@ struct ContentView: View {
                 title: constant(String(localized: "command.openFolder.title", defaultValue: "Open Folder…")),
                 subtitle: constant(String(localized: "command.openFolder.subtitle", defaultValue: "Workspace")),
                 keywords: ["open", "folder", "repository", "project", "directory"]
-            )
-        )
-        contributions.append(
-            CommandPaletteCommandContribution(
-                commandId: "palette.openFolderInVSCodeInline",
-                title: constant(
-                    String(
-                        localized: "command.openFolderInVSCodeInline.title",
-                        defaultValue: "Open Folder in VS Code (Inline)…"
-                    )
-                ),
-                subtitle: constant(
-                    String(
-                        localized: "command.openFolderInVSCodeInline.subtitle",
-                        defaultValue: "VS Code Inline"
-                    )
-                ),
-                keywords: ["open", "folder", "directory", "project", "vs", "code", "inline", "editor", "browser"],
-                when: { _ in TerminalDirectoryOpenTarget.vscodeInline.isAvailable() }
             )
         )
         contributions.append(
@@ -7597,17 +7569,6 @@ struct ContentView: View {
         )
         contributions.append(
             CommandPaletteCommandContribution(
-                commandId: "palette.mobileConnect",
-                title: constant(
-                    String(localized: "command.mobileConnect.title", defaultValue: "Open Mobile Pairing")
-                ),
-                subtitle: constant(String(localized: "command.mobileConnect.subtitle", defaultValue: "Mobile")),
-                keywords: Self.commandPaletteMobileConnectKeywords,
-                when: { !$0.bool(CommandPaletteContextKeys.mobileRemoteControlManagedByPolicy) }
-            )
-        )
-        contributions.append(
-            CommandPaletteCommandContribution(
                 commandId: "palette.makeDefaultTerminal",
                 title: constant(
                     String(
@@ -7659,30 +7620,6 @@ struct ContentView: View {
                 title: constant(String(localized: "command.restartSocketListener.title", defaultValue: "Restart CLI Listener")),
                 subtitle: constant(String(localized: "command.restartSocketListener.subtitle", defaultValue: "Global")),
                 keywords: ["restart", "socket", "listener", "cli", "cmux", "control"]
-            )
-        )
-        contributions.append(
-            CommandPaletteCommandContribution(
-                commandId: "palette.disableBrowser",
-                title: constant(String(localized: "command.disableBrowser.title", defaultValue: "Disable cmux Browser")),
-                subtitle: constant(String(localized: "command.browserAvailability.subtitle", defaultValue: "Browser")),
-                keywords: ["browser", "disable", "external", "default", "open", "auth"],
-                when: {
-                    !$0.bool(CommandPaletteContextKeys.browserDisabled)
-                        && !$0.bool(CommandPaletteContextKeys.browserManagedByPolicy)
-                }
-            )
-        )
-        contributions.append(
-            CommandPaletteCommandContribution(
-                commandId: "palette.enableBrowser",
-                title: constant(String(localized: "command.enableBrowser.title", defaultValue: "Enable cmux Browser")),
-                subtitle: constant(String(localized: "command.browserAvailability.subtitle", defaultValue: "Browser")),
-                keywords: ["browser", "enable", "embedded", "open"],
-                when: {
-                    $0.bool(CommandPaletteContextKeys.browserDisabled)
-                        && !$0.bool(CommandPaletteContextKeys.browserManagedByPolicy)
-                }
             )
         )
         contributions.append(contentsOf: Self.commandPaletteSettingsToggleCommandContributions())
@@ -7954,109 +7891,6 @@ struct ContentView: View {
                 }
             )
         )
-        contributions.append(
-            CommandPaletteCommandContribution(
-                commandId: "palette.browserBack",
-                title: constant(String(localized: "command.browserBack.title", defaultValue: "Back")),
-                subtitle: browserPanelSubtitle,
-                shortcutHint: "⌘[",
-                keywords: ["browser", "back", "history"],
-                when: { $0.bool(CommandPaletteContextKeys.panelIsBrowser) }
-            )
-        )
-        contributions.append(
-            CommandPaletteCommandContribution(
-                commandId: "palette.browserForward",
-                title: constant(String(localized: "command.browserForward.title", defaultValue: "Forward")),
-                subtitle: browserPanelSubtitle,
-                shortcutHint: "⌘]",
-                keywords: ["browser", "forward", "history"],
-                when: { $0.bool(CommandPaletteContextKeys.panelIsBrowser) }
-            )
-        )
-        contributions.append(
-            CommandPaletteCommandContribution(
-                commandId: "palette.browserReload",
-                title: constant(String(localized: "command.browserReload.title", defaultValue: "Reload Page")),
-                subtitle: browserPanelSubtitle,
-                shortcutHint: "⌘R",
-                keywords: ["browser", "reload", "refresh"],
-                when: { $0.bool(CommandPaletteContextKeys.panelIsBrowser) }
-            )
-        )
-        contributions.append(
-            CommandPaletteCommandContribution(
-                commandId: "palette.browserOpenDefault",
-                title: constant(String(localized: "command.browserOpenDefault.title", defaultValue: "Open Current Page in Default Browser")),
-                subtitle: browserPanelSubtitle,
-                keywords: ["open", "default", "external", "browser"],
-                when: { $0.bool(CommandPaletteContextKeys.panelIsBrowser) }
-            )
-        )
-        contributions.append(
-            CommandPaletteCommandContribution(
-                commandId: "palette.browserFocusAddressBar",
-                title: constant(String(localized: "command.browserFocusAddressBar.title", defaultValue: "Focus Address Bar")),
-                subtitle: browserPanelSubtitle,
-                shortcutHint: "⌘L",
-                keywords: ["browser", "address", "omnibar", "url"],
-                when: { $0.bool(CommandPaletteContextKeys.panelIsBrowser) }
-            )
-        )
-        contributions.append(
-            CommandPaletteCommandContribution(
-                commandId: "palette.browserFocusMode",
-                title: { context in
-                    context.bool(CommandPaletteContextKeys.panelBrowserFocusModeActive)
-                        ? String(localized: "command.browserFocusMode.exit.title", defaultValue: "Exit Browser Focus Mode")
-                        : String(localized: "command.browserFocusMode.enter.title", defaultValue: "Enter Browser Focus Mode")
-                },
-                subtitle: browserPanelSubtitle,
-                keywords: ["browser", "focus", "mode", "keyboard", "shortcuts", "webview"],
-                when: { $0.bool(CommandPaletteContextKeys.panelIsBrowser) }
-            )
-        )
-        contributions.append(
-            CommandPaletteCommandContribution(
-                commandId: "palette.browserToggleOmnibar",
-                title: { context in
-                    if context.bool(CommandPaletteContextKeys.panelBrowserOmnibarVisible) {
-                        return String(localized: "command.browserHideOmnibar.title", defaultValue: "Hide Browser Omnibar")
-                    }
-                    return String(localized: "command.browserShowOmnibar.title", defaultValue: "Show Browser Omnibar")
-                },
-                subtitle: browserPanelSubtitle,
-                keywords: ["browser", "address", "omnibar", "url", "toolbar", "chrome", "show", "hide"],
-                when: { $0.bool(CommandPaletteContextKeys.panelIsBrowser) }
-            )
-        )
-        contributions.append(
-            CommandPaletteCommandContribution(
-                commandId: "palette.browserToggleDevTools",
-                title: constant(String(localized: "command.browserToggleDevTools.title", defaultValue: "Toggle Developer Tools")),
-                subtitle: browserPanelSubtitle,
-                keywords: ["browser", "devtools", "inspector"],
-                when: { $0.bool(CommandPaletteContextKeys.panelIsBrowser) }
-            )
-        )
-        contributions.append(
-            CommandPaletteCommandContribution(
-                commandId: "palette.browserConsole",
-                title: constant(String(localized: "command.browserConsole.title", defaultValue: "Show JavaScript Console")),
-                subtitle: browserPanelSubtitle,
-                keywords: ["browser", "console", "javascript"],
-                when: { $0.bool(CommandPaletteContextKeys.panelIsBrowser) }
-            )
-        )
-        contributions.append(
-            CommandPaletteCommandContribution(
-                commandId: "palette.browserReactGrab",
-                title: constant(String(localized: "command.browserReactGrab.title", defaultValue: "Toggle React Grab")),
-                subtitle: browserPanelSubtitle,
-                keywords: ["browser", "react", "grab", "inspect", "element"],
-                when: { $0.bool(CommandPaletteContextKeys.panelIsBrowser) }
-            )
-        )
         Self.appendBrowserKeepPageActiveCommandContribution(to: &contributions, panelSubtitle: browserPanelSubtitle)
         Self.appendViewZoomCommandContributions(to: &contributions, panelSubtitle: panelSubtitle)
         contributions.append(
@@ -8084,51 +7918,6 @@ struct ContentView: View {
                 subtitle: markdownPanelSubtitle,
                 keywords: ["markdown", "zoom", "reset", "actual size", "font", "default"],
                 when: { $0.bool(CommandPaletteContextKeys.panelIsMarkdown) }
-            )
-        )
-        contributions.append(
-            CommandPaletteCommandContribution(
-                commandId: "palette.browserClearHistory",
-                title: constant(String(localized: "command.browserClearHistory.title", defaultValue: "Clear Browser History")),
-                subtitle: constant(String(localized: "command.browserClearHistory.subtitle", defaultValue: "Browser")),
-                keywords: ["browser", "history", "clear"],
-                when: { $0.bool(CommandPaletteContextKeys.panelIsBrowser) }
-            )
-        )
-        contributions.append(
-            CommandPaletteCommandContribution(
-                commandId: "palette.browserSplitRight",
-                title: constant(String(localized: "command.browserSplitRight.title", defaultValue: "Split Browser Right")),
-                subtitle: constant(String(localized: "command.browserSplitRight.subtitle", defaultValue: "Browser Layout")),
-                keywords: ["browser", "split", "right"],
-                when: {
-                    $0.bool(CommandPaletteContextKeys.panelIsBrowser) &&
-                    !$0.bool(CommandPaletteContextKeys.browserDisabled)
-                }
-            )
-        )
-        contributions.append(
-            CommandPaletteCommandContribution(
-                commandId: "palette.browserSplitDown",
-                title: constant(String(localized: "command.browserSplitDown.title", defaultValue: "Split Browser Down")),
-                subtitle: constant(String(localized: "command.browserSplitDown.subtitle", defaultValue: "Browser Layout")),
-                keywords: ["browser", "split", "down"],
-                when: {
-                    $0.bool(CommandPaletteContextKeys.panelIsBrowser) &&
-                    !$0.bool(CommandPaletteContextKeys.browserDisabled)
-                }
-            )
-        )
-        contributions.append(
-            CommandPaletteCommandContribution(
-                commandId: "palette.browserDuplicateRight",
-                title: constant(String(localized: "command.browserDuplicateRight.title", defaultValue: "Duplicate Browser to the Right")),
-                subtitle: constant(String(localized: "command.browserDuplicateRight.subtitle", defaultValue: "Browser Layout")),
-                keywords: ["browser", "duplicate", "clone", "split"],
-                when: {
-                    $0.bool(CommandPaletteContextKeys.panelIsBrowser) &&
-                    !$0.bool(CommandPaletteContextKeys.browserDisabled)
-                }
             )
         )
 

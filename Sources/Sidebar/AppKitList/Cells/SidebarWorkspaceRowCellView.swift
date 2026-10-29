@@ -29,9 +29,6 @@ final class SidebarWorkspaceRowTableCellView: NSTableCellView {
     private var leadingSpinner: GPUSpinnerNSView?
     private let pinImageView = NSImageView()
     private let muteImageView = NSImageView()
-    private let mediaAudioView = NSImageView()
-    private let mediaMicView = NSImageView()
-    private let mediaCameraView = NSImageView()
     private let statusGlyphButton = SidebarRowTaskStatusGlyphButton()
     /// `sidebar.compactAgentStatus` leading status glyph.
     private let compactStatusGlyphView = SidebarCompactStatusGlyphImageView()
@@ -324,7 +321,7 @@ final class SidebarWorkspaceRowTableCellView: NSTableCellView {
         addSubview(railView)
         addSubview(contentContainer)
 
-        for view in [pinImageView, muteImageView, cloudImageView, mediaAudioView, mediaMicView, mediaCameraView] {
+        for view in [pinImageView, muteImageView, cloudImageView] {
             view.imageScaling = .scaleProportionallyDown
             contentContainer.addSubview(view)
         }
@@ -1284,11 +1281,6 @@ final class SidebarWorkspaceRowTableCellView: NSTableCellView {
         if !muteImageView.isHidden {
             let side = model.scaled(9) + 4
             place(muteImageView, size: NSSize(width: side, height: side), centerY: firstLineCenter)
-            x += side + titleRowSpacing
-        }
-        for view in [mediaAudioView, mediaMicView, mediaCameraView] where !view.isHidden {
-            let side = model.scaled(9) + 4
-            place(view, size: NSSize(width: side, height: side), centerY: firstLineCenter)
             x += side + titleRowSpacing
         }
         if !statusGlyphButton.isHidden {
