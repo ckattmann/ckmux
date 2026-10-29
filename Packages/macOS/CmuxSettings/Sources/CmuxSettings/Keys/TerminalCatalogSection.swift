@@ -109,7 +109,7 @@ public struct TerminalCatalogSection: SettingCatalogSection {
     /// behavior settings preserve the managed palette; it is enabled by default.
     public let adaptiveDefaultTheme = DefaultsKey<Bool>(
         id: "terminal.adaptiveDefaultTheme",
-        defaultValue: true,
+        defaultValue: false,
         userDefaultsKey: "terminal.adaptiveDefaultTheme"
     )
 
