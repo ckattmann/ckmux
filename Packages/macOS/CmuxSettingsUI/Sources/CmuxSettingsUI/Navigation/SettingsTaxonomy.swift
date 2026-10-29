@@ -12,7 +12,6 @@ enum SettingsTaxonomyGroup: String, CaseIterable, Identifiable, Sendable {
     case sidebarAndDock
     case agentsAndAutomation
     case browserAndFiles
-    case remoteAndDevices
     case keyboardAndAdvanced
 
     /// Stable identity for SwiftUI section iteration.
@@ -54,12 +53,6 @@ enum SettingsTaxonomyGroup: String, CaseIterable, Identifiable, Sendable {
                 defaultValue: "Browser & Files",
                 bundle: .module
             )
-        case .remoteAndDevices:
-            return String(
-                localized: "settings.taxonomy.remoteAndDevices",
-                defaultValue: "Remote & Devices",
-                bundle: .module
-            )
         case .keyboardAndAdvanced:
             return String(
                 localized: "settings.taxonomy.keyboardAndAdvanced",
@@ -73,7 +66,7 @@ enum SettingsTaxonomyGroup: String, CaseIterable, Identifiable, Sendable {
     var sections: [SettingsSectionID] {
         switch self {
         case .general:
-            return [.account, .app, .themes, .sleepyMode]
+            return [.app, .themes, .sleepyMode]
         case .terminal:
             return [.terminal, .textBox]
         case .workspace:
@@ -84,8 +77,6 @@ enum SettingsTaxonomyGroup: String, CaseIterable, Identifiable, Sendable {
             return [.automation, .computerUse]
         case .browserAndFiles:
             return [.browser, .browserImport]
-        case .remoteAndDevices:
-            return [.mobile, .cloudMachines, .computers, .networking]
         case .keyboardAndAdvanced:
             return [.globalHotkey, .keyboardShortcuts, .betaFeatures, .settingsJSON, .reset]
         }

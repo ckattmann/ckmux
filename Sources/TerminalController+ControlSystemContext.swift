@@ -1,7 +1,6 @@
 import AppKit
 import Bonsplit
 import CmuxControlSocket
-import CmuxFeedback
 import CmuxWorkspaces
 import Foundation
 
@@ -535,8 +534,6 @@ extension TerminalController: ControlSystemContext {
                     NSRunningApplication.current.activate(options: [.activateAllWindows])
                 }
             }
-
-            FeedbackComposerBridge().openComposer(in: targetWindow)
         }
     }
 

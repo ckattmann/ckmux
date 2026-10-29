@@ -1,18 +1,11 @@
 import SwiftUI
 
 enum SettingsNavigationTarget: String, CaseIterable, Identifiable {
-    case account
     case app
     case themes
     case terminal
     case textBox
     case sleepyMode
-    case mobile
-    case cloudMachines
-    /// Devices (My Devices). The raw value predates the rename and stays
-    /// because persisted navigation targets and `cmux settings open` send it.
-    case computers
-    case networking
     case sidebarAppearance
     case customSidebars
     case betaFeatures
@@ -30,10 +23,6 @@ enum SettingsNavigationTarget: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .computers:
-            return String(localized: "settings.section.devices", defaultValue: "Devices")
-        case .account:
-            return String(localized: "settings.section.account", defaultValue: "Account")
         case .app:
             return String(localized: "settings.section.app", defaultValue: "App")
         case .themes:
@@ -44,12 +33,6 @@ enum SettingsNavigationTarget: String, CaseIterable, Identifiable {
             return String(localized: "settings.section.textBox", defaultValue: "TextBox")
         case .sleepyMode:
             return String(localized: "settings.section.sleepyMode", defaultValue: "Sleepy Mode")
-        case .mobile:
-            return String(localized: "settings.section.mobile", defaultValue: "Mobile")
-        case .cloudMachines:
-            return String(localized: "settings.section.cloudMachines", defaultValue: "Cloud")
-        case .networking:
-            return String(localized: "settings.section.networking", defaultValue: "Networking")
         case .workspaceColors:
             return String(localized: "settings.section.workspaceColors", defaultValue: "Workspace Colors")
         case .sidebarAppearance:
@@ -79,10 +62,6 @@ enum SettingsNavigationTarget: String, CaseIterable, Identifiable {
 
     var symbolName: String {
         switch self {
-        case .computers:
-            return "desktopcomputer"
-        case .account:
-            return "person.crop.circle"
         case .app:
             return "gearshape"
         case .themes:
@@ -93,12 +72,6 @@ enum SettingsNavigationTarget: String, CaseIterable, Identifiable {
             return "textformat"
         case .sleepyMode:
             return "moon.zzz"
-        case .mobile:
-            return "iphone"
-        case .cloudMachines:
-            return "cloud"
-        case .networking:
-            return "network"
         case .workspaceColors:
             return "paintpalette"
         case .sidebarAppearance:
@@ -128,10 +101,6 @@ enum SettingsNavigationTarget: String, CaseIterable, Identifiable {
 
     var searchText: String {
         switch self {
-        case .computers:
-            return String(localized: "settings.devices.keywords", defaultValue: "devices my devices computers macs mac discovery discover discoverable incoming access tailscale pairing remote workspaces")
-        case .account:
-            return "\(title) sign in team sync"
         case .app:
             return "\(title) language workspace notifications menu bar telemetry default terminal"
         case .themes:
@@ -142,12 +111,6 @@ enum SettingsNavigationTarget: String, CaseIterable, Identifiable {
             return "\(title) textbox text box rich input prompt new terminal workspace split tab focus height"
         case .sleepyMode:
             return "\(title) sleepy mode screensaver caffeinate keep awake lock touch id battery wifi clock mascot theme glow pixel"
-        case .mobile:
-            return "\(title) ios iphone ipad mobile pairing local network sync"
-        case .cloudMachines:
-            return "\(title) cloud machines vm virtual machine persistent computer plan upgrade fleet"
-        case .networking:
-            return "\(title) iroh relay server private network tailscale vpn direct peer custom provider region"
         case .workspaceColors:
             return "\(title) palette tabs"
         case .sidebarAppearance:

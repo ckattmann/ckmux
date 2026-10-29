@@ -57,7 +57,6 @@ final class CmuxFeatureFlags {
     private static let releaseControlDistinctIDPrefix =
         releaseControlProductWideDistinctID + "-"
     private nonisolated static let maximumPostHogControlPlaneResponseBytes = 1_048_576
-    private nonisolated static let releaseControlRetryAfterGate = CmxRetryAfterGate()
 
     // FLAG(key: sidebar-appkit-list-experiment, owner: lawrencecchen,
     //      reviewBy: 2026-11-16, defaultWhenUnavailable: true)
@@ -640,35 +639,8 @@ final class CmuxFeatureFlags {
         distinctID: String,
         personProperties: [String: String]
     ) async -> [String: Bool]? {
-        guard (try? await releaseControlRetryAfterGate.wait()) != nil else { return nil }
-        guard let request = postHogControlPlaneRequest(
-            distinctID: distinctID,
-            personProperties: personProperties
-        ) else { return nil }
-        let configuration = URLSessionConfiguration.ephemeral
-        configuration.timeoutIntervalForRequest = 10
-        configuration.timeoutIntervalForResource = 15
-        let session = URLSession(configuration: configuration)
-        defer { session.invalidateAndCancel() }
-        guard let (bytes, response) = try? await session.bytes(for: request),
-              let http = response as? HTTPURLResponse else { return nil }
-        if http.statusCode == 429 {
-            let seconds = CmxRetryAfterPolicy().seconds(
-                from: http,
-                defaultSeconds: CmxRetryAfterPolicy().defaultRateLimitSeconds
-            ) ?? CmxRetryAfterPolicy().defaultRateLimitSeconds
-            await releaseControlRetryAfterGate.extend(by: seconds)
-            return nil
-        }
-        guard (200..<300).contains(http.statusCode),
-              response.expectedContentLength < 0
-                || response.expectedContentLength <= maximumPostHogControlPlaneResponseBytes,
-              let data = try? await boundedPostHogControlPlaneData(
-                  from: bytes,
-                  maximumByteCount: maximumPostHogControlPlaneResponseBytes
-              )
-        else { return nil }
-        return postHogControlPlaneFlagValues(from: data)
+        _ = (distinctID, personProperties)
+        return nil
     }
 
     nonisolated static func boundedPostHogControlPlaneData<Bytes: AsyncSequence>(

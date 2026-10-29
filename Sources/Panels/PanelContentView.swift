@@ -5,7 +5,6 @@ import Foundation
 import Bonsplit
 import AppKit
 import CmuxAppKitSupportUI
-import CmuxFeedback
 
 /// View that renders the appropriate panel view based on panel type
 struct PanelContentView: View {

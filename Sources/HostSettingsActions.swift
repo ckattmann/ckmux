@@ -1,5 +1,4 @@
 import AppKit
-import CMUXMobileCore
 import CmuxWorkspaces
 import CmuxSettings
 import CmuxSettingsUI
@@ -12,7 +11,6 @@ nonisolated private let hostSettingsLogger = Logger(subsystem: "com.cmuxterm.app
 /// Routes Settings actions to app-owned services, keeping the package independent.
 @MainActor
 final class HostSettingsActions: SettingsHostActions {
-    let computersActions: ComputersSettingsActions
     private let configFileURL: URL
     private let automationConfigStore: AutomationConfigStore
     private let openAutomationRulesFile: @MainActor (URL) -> Void
@@ -64,10 +62,8 @@ final class HostSettingsActions: SettingsHostActions {
                 defaultValue: "Check that the configuration folder is writable and the disk has free space, then try again."
             )
             alert.runModal()
-        },
-        computersActions: ComputersSettingsActions? = nil
+        }
     ) {
-        self.computersActions = computersActions ?? ComputersSettingsActions()
         self.configFileURL = configFileURL
         self.automationConfigStore = automationConfigStore
         self.openAutomationRulesFile = openAutomationRulesFile
@@ -727,36 +723,6 @@ final class HostSettingsActions: SettingsHostActions {
         return true
     }
 
-    func mobilePhonePushSettingsUpdates() -> AsyncStream<MobilePhonePushSettingsSnapshot> {
-        AsyncStream { continuation in
-            let (signals, signalContinuation) = AsyncStream<Void>.makeStream(
-                bufferingPolicy: .bufferingNewest(1)
-            )
-            let observer = MobileHostStatusObserverToken(
-                NotificationCenter.default.addObserver(
-                    forName: Notification.Name("cmux.unavailable"),
-                    object: nil,
-                    queue: nil
-                ) { _ in
-                    signalContinuation.yield(())
-                }
-            )
-            let drainTask = Task { @MainActor in
-                continuation.yield(mobilePhonePushSettings())
-                for await _ in signals {
-                    if Task.isCancelled { break }
-                    continuation.yield(mobilePhonePushSettings())
-                }
-                continuation.finish()
-            }
-            continuation.onTermination = { _ in
-                drainTask.cancel()
-                signalContinuation.finish()
-                observer.remove()
-            }
-        }
-    }
-
     private func existingConfigWindow() -> NSWindow? {
         if let configWindow, configWindow.isVisible || configWindow.isMiniaturized {
             return configWindow
@@ -854,62 +820,6 @@ final class HostSettingsActions: SettingsHostActions {
         return true
     }
 
-    func mobilePairingStatusUpdates() -> AsyncStream<MobilePairingStatusSnapshot> {
-        AsyncStream { continuation in
-            // Bridge the notification through a Sendable `Void` signal stream so
-            // the non-Sendable `Notification` never crosses into the MainActor
-            // drain task. Mirrors `UserDefaultsSettingsStore.values(for:)`.
-            let (signals, signalContinuation) = AsyncStream<Void>.makeStream(
-                bufferingPolicy: .bufferingNewest(1)
-            )
-            let observer = MobileHostStatusObserverToken(
-                NotificationCenter.default.addObserver(
-                    forName: Notification.Name("cmux.unavailable"),
-                    object: nil,
-                    queue: nil
-                ) { _ in
-                    signalContinuation.yield(())
-                }
-            )
-            let drainTask = Task { @MainActor in
-                // Seed with the current status, then forward every change.
-                for await _ in signals {
-                    if Task.isCancelled { break }
-                }
-                continuation.finish()
-            }
-            continuation.onTermination = { _ in
-                drainTask.cancel()
-                signalContinuation.finish()
-                observer.remove()
-            }
-        }
-    }
-
-    /// Splits an observed local IROH socket (`203.0.113.7:58465` or
-    /// `[2001:db8::7]:58465`) into the host and port ``MobilePairingRoute``
-    /// renders, or `nil` for anything else. Internal for unit tests.
-    nonisolated static func splitSocketAddress(_ value: String) -> (host: String, port: Int)? {
-        let hostPart: Substring
-        let portPart: Substring
-        if value.hasPrefix("[") {
-            guard let closing = value.firstIndex(of: "]") else { return nil }
-            hostPart = value[value.index(after: value.startIndex)..<closing]
-            let remainder = value[value.index(after: closing)...]
-            guard remainder.first == ":" else { return nil }
-            portPart = remainder.dropFirst()
-        } else {
-            guard let separator = value.lastIndex(of: ":"),
-                  !value[..<separator].contains(":") else { return nil }
-            hostPart = value[..<separator]
-            portPart = value[value.index(after: separator)...]
-        }
-        guard !hostPart.isEmpty,
-              let port = Int(portPart),
-              (1...65535).contains(port) else { return nil }
-        return (String(hostPart), port)
-    }
-
     private static func desktopNotificationAuthorizationState(
         from state: NotificationAuthorizationState
     ) -> DesktopNotificationAuthorizationState {
@@ -926,26 +836,6 @@ final class HostSettingsActions: SettingsHostActions {
             return .provisional
         case .ephemeral:
             return .ephemeral
-        }
-    }
-
-    func mobilePairingDefaultDisplayName() -> String {
-        // The Mac's system name, the pairing name used when no override is set.
-        // Stable across override edits, so the placeholder never goes stale.
-        Host.current().localizedName ?? ""
-    }
-
-    /// Localized transport label for a pairing route shown in diagnostics.
-    nonisolated private static func routeKindLabel(_ kind: CmxAttachTransportKind) -> String {
-        switch kind {
-        case .tailscale:
-            return String(localized: "settings.mobile.route.tailscale", defaultValue: "Tailscale")
-        case .debugLoopback:
-            return String(localized: "settings.mobile.route.loopback", defaultValue: "Loopback")
-        case .iroh:
-            return String(localized: "settings.mobile.route.iroh", defaultValue: "Iroh")
-        case .websocket:
-            return String(localized: "settings.mobile.route.websocket", defaultValue: "WebSocket")
         }
     }
 

@@ -1,4 +1,3 @@
-import CMUXMobileCore
 import Foundation
 
 /// The catalog identity of one tagged cmux app instance on another Mac signed
@@ -20,13 +19,14 @@ public struct SurfaceDeviceInstanceID: Hashable, Codable, Sendable, CustomString
     /// The registry tag of the stable channel; every other tag is a build channel or dev launch tag.
     public static let defaultTag = "default"
 
-    /// Canonical lowercase device UUID (``cmxCanonicalDeviceID``).
+    /// Canonical lowercase device UUID.
     public let deviceID: String
     /// Normalized app-instance tag; empty input becomes ``defaultTag``.
     public let tag: String
 
     public init(deviceID: String, tag: String) {
-        self.deviceID = cmxCanonicalDeviceID(deviceID.trimmingCharacters(in: .whitespacesAndNewlines))
+        let trimmedDeviceID = deviceID.trimmingCharacters(in: .whitespacesAndNewlines)
+        self.deviceID = UUID(uuidString: trimmedDeviceID)?.uuidString.lowercased() ?? trimmedDeviceID
         let trimmedTag = tag.trimmingCharacters(in: .whitespacesAndNewlines)
         self.tag = trimmedTag.isEmpty ? Self.defaultTag : trimmedTag
     }
@@ -59,10 +59,5 @@ public struct SurfaceDeviceInstanceID: Hashable, Codable, Sendable, CustomString
         default:
             return isDefaultTag || tag == "nightly"
         }
-    }
-
-    /// The shared cross-app spelling used by pairing and presence code.
-    public var appInstanceIdentity: CmxMacAppInstanceIdentity {
-        CmxMacAppInstanceIdentity(macDeviceID: deviceID, instanceTag: isDefaultTag ? nil : tag)
     }
 }

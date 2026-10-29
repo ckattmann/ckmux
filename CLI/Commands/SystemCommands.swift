@@ -195,15 +195,6 @@ struct SessionMoveCommand: SharedLegacyFacadeCommand {
 }
 
 /// Dispatched before the legacy parser's command switch.
-struct ImportCommand: SharedLegacyFacadeCommand {
-    @Flag(name: .customLong("dry-run")) var dryRun = false
-    @Flag(name: .customLong("yes")) var yes = false
-    @Option(name: .customLong("path"), completion: .file()) var path: String?
-    @Argument(parsing: .allUnrecognized) var arguments: [String] = []
-    static let configuration = CommandConfiguration(commandName: "import", helpNames: [])
-}
-
-/// Dispatched before the legacy parser's command switch.
 struct ReviewCommand: SharedLegacyFacadeCommand {
     // See AuthCommand's comment: no catch-all argument alongside `subcommands`.
     static let configuration = CommandConfiguration(
@@ -888,13 +879,6 @@ struct BillingCheckoutCommand: SharedLegacyFacadeCommand {
     @Flag(name: .customLong("no-open")) var noOpen = false
     @Argument(parsing: .allUnrecognized) var arguments: [String] = []
     static let configuration = CommandConfiguration(commandName: "checkout", helpNames: [])
-}
-
-/// Dispatched before the legacy parser's command switch; its argv (including
-/// `run -c '<command>'`) must reach `runSudoCommand` untouched.
-struct SudoCommand: SharedLegacyFacadeCommand {
-    @Argument(parsing: .captureForPassthrough) var arguments: [String] = []
-    static let configuration = CommandConfiguration(commandName: "sudo", helpNames: [])
 }
 
 struct VaultCommand: SharedLegacyFacadeCommand {

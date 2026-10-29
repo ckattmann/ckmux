@@ -1,4 +1,3 @@
-import CmuxHerdrResume
 import Foundation
 
 /// Picks the process-detected resume binding for one foreground terminal
@@ -20,7 +19,7 @@ enum ProcessDetectedTerminalBinding {
         // own PTY. Letting it through would bind an `ssh` or `tmux` from deep
         // inside herdr to that surface, where it could outrank the surface's
         // real foreground herdr client.
-        if HerdrResumeInvocation.isInsideHerdrPane(environment: environment) {
+        if environment["HERDR_ENV"] == "1" {
             return nil
         }
         if let tmuxBinding = TmuxResumeParser.binding(

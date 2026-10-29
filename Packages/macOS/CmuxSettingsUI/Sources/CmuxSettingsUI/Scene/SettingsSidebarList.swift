@@ -6,11 +6,10 @@ import SwiftUI
 struct SettingsSidebarList: View {
     @Bindable var query: SettingsSearchQuery
     @Binding var selection: String
-    let isCloudSectionAvailable: Bool
 
     var body: some View {
         List(selection: $selection) {
-            SettingsSidebarRows(query: query, isCloudSectionAvailable: isCloudSectionAvailable)
+            SettingsSidebarRows(query: query)
         }
         .listStyle(.sidebar)
         .navigationTitle(String(localized: "settings.title", defaultValue: "Settings"))
@@ -25,10 +24,9 @@ struct SettingsSidebarList: View {
 @MainActor
 private struct SettingsSidebarRows: View {
     let query: SettingsSearchQuery
-    let isCloudSectionAvailable: Bool
 
     var body: some View {
-        let matches = query.results.filter { isEntryVisible($0) }
+        let matches = query.results
         if matches.isEmpty {
             Text(String(localized: "settings.search.noResults", defaultValue: "No Results"))
                 .foregroundStyle(.secondary)
@@ -53,16 +51,6 @@ private struct SettingsSidebarRows: View {
                     }
                 }
             }
-        }
-    }
-
-    private func isEntryVisible(_ entry: SettingsSearchIndex.Entry) -> Bool {
-        guard !isCloudSectionAvailable else { return true }
-        switch entry.kind {
-        case .section:
-            return entry.id != "section:\(SettingsSectionID.cloudMachines.rawValue)"
-        case .setting(let parent):
-            return parent != .cloudMachines
         }
     }
 

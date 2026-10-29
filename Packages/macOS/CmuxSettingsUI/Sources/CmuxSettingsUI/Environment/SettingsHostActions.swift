@@ -1,5 +1,4 @@
 import CmuxFoundation
-import CMUXMobileCore
 import CmuxSettings
 import Foundation
 
@@ -44,8 +43,7 @@ public final class CustomSidebarTemplateGalleryRequest {
 /// check for `nil` callbacks and hide the corresponding buttons
 /// when no host action is available.
 @MainActor
-public protocol SettingsHostActions: AnyObject, CloudMachinesSettingsActions {
-    func computersSettingsActions() -> ComputersSettingsActions
+public protocol SettingsHostActions: AnyObject {
     /// A registry snapshot used to populate the per-agent notification sound
     /// matrix. The host owns discovery so newly registered agents appear
     /// without a second list in the settings package.
@@ -188,11 +186,6 @@ public protocol SettingsHostActions: AnyObject, CloudMachinesSettingsActions {
     @discardableResult
     func setMenuBarOnly(_ enabled: Bool) -> Bool
 
-    /// Opens the iOS pairing window, which walks through signing in to the
-    /// same account on the iPhone. The host owns the window so the package
-    /// can't open it directly.
-    func openMobilePairingWindow()
-
     /// Plays the currently configured notification sound so the user
     /// can preview it from the Settings UI.
     func previewNotificationSound(value: String, customFilePath: String)
@@ -273,55 +266,6 @@ public protocol SettingsHostActions: AnyObject, CloudMachinesSettingsActions {
     /// - Returns: `false` when the write failed.
     @discardableResult
     func applyTerminalGhosttyOption(_ change: GhosttyTerminalOptionChange) async -> Bool
-
-    /// The current status of the Mac-side iOS pairing host (the actual bound
-    /// port, whether it fell back from the configured port, the active iOS
-    /// connection count, the effective display name, and the routes the phone
-    /// can reach this Mac on), or `nil` when the host has not started the
-    /// mobile service yet (or in previews/tests). The Mobile section renders
-    /// the bound-port indicator and diagnostics from this.
-    ///
-    /// Backed by host-app runtime state, so it lives here rather than in the
-    /// catalog. See ``mobilePairingStatusUpdates()`` for live refresh.
-    func mobilePairingStatus() -> MobilePairingStatusSnapshot?
-
-    /// A stream that yields a fresh ``MobilePairingStatusSnapshot`` whenever the
-    /// pairing host's status changes (listener bound/stopped, bound port
-    /// changed, connection count changed). The Mobile section subscribes so the
-    /// bound-port indicator and connection count stay live without polling.
-    func mobilePairingStatusUpdates() -> AsyncStream<MobilePairingStatusSnapshot>
-
-    /// Cross-platform Iroh and private-network settings controller supplied by
-    /// the host app. `nil` in previews and hosts without the Iroh runtime.
-    func irohSettingsController() -> (any CmxIrohSettingsControlling)?
-
-    /// The Mac's system name (e.g. `Host.current().localizedName`) used as the
-    /// iOS pairing display name when the user sets no override. The Mobile
-    /// section shows it as the display-name field placeholder. Empty when
-    /// unavailable (previews/tests). This is a stable host value, not derived
-    /// from the override, so the placeholder never goes stale as the override
-    /// is edited.
-    func mobilePairingDefaultDisplayName() -> String
-
-    /// Applies an explicitly-requested iOS pairing port, checking availability
-    /// first so a port already in use leaves the running listener untouched. The
-    /// Mobile section calls this from its **Apply** button and renders the
-    /// returned ``MobilePairingPortApplyResult`` as inline feedback; the live
-    /// status stream then reflects the actual bound port.
-    ///
-    /// `async` because the availability check probes a real bind.
-    func applyMobilePairingPort(_ port: Int) async -> MobilePairingPortApplyResult
-
-    /// Current Mac-owned forwarding policy for cmux mobile push notifications.
-    func mobilePhonePushSettings() -> MobilePhonePushSettingsSnapshot
-
-    /// Live forwarding-policy updates from every app entrypoint.
-    func mobilePhonePushSettingsUpdates() -> AsyncStream<MobilePhonePushSettingsSnapshot>
-
-    /// Applies one forwarding-policy field through the host's shared owner.
-    func updateMobilePhonePushSettings(
-        _ mutation: MobilePhonePushSettingsMutation
-    ) -> MobilePhonePushSettingsSnapshot
 
     /// Shows the Sleepy Mode screensaver as a non-locking preview (any key/click
     /// exits, no Touch ID). The host owns the overlay window.
@@ -566,8 +510,6 @@ public extension SettingsHostActions {
     /// Default no-op for package previews and tests without app-language ownership.
     func applyLanguageOverride(_ language: AppLanguage) {}
 
-    func openMobilePairingWindow() {}
-
     /// Default no-op preview action for hosts without a Sleepy Mode overlay.
     func sleepyModePreview() {}
     /// Default no-op start action for hosts without a Sleepy Mode overlay.
@@ -590,39 +532,6 @@ public extension SettingsHostActions {
 
     /// Default: no refresh hook, for previews and tests without a host.
     func refreshDesktopNotificationAuthorizationStatus() {}
-
-    /// Default: no status, for hosts without a live mobile service (previews/tests).
-    func mobilePairingStatus() -> MobilePairingStatusSnapshot? { nil }
-
-    /// Default: an immediately-finished stream, for hosts without a live mobile service.
-    func mobilePairingStatusUpdates() -> AsyncStream<MobilePairingStatusSnapshot> {
-        AsyncStream { $0.finish() }
-    }
-
-    func irohSettingsController() -> (any CmxIrohSettingsControlling)? { nil }
-
-    /// Default: empty, for hosts that cannot resolve the Mac's system name.
-    func mobilePairingDefaultDisplayName() -> String { "" }
-
-    /// Default: save-for-later, for hosts without a live mobile service (previews/tests).
-    func applyMobilePairingPort(_ port: Int) async -> MobilePairingPortApplyResult {
-        (1...65535).contains(port) ? .savedForLater(port: port) : .invalid(requestedPort: port)
-    }
-
-    func mobilePhonePushSettings() -> MobilePhonePushSettingsSnapshot {
-        .defaultValue
-    }
-
-    func mobilePhonePushSettingsUpdates() -> AsyncStream<MobilePhonePushSettingsSnapshot> {
-        AsyncStream { $0.finish() }
-    }
-
-    func updateMobilePhonePushSettings(
-        _ mutation: MobilePhonePushSettingsMutation
-    ) -> MobilePhonePushSettingsSnapshot {
-        _ = mutation
-        return mobilePhonePushSettings()
-    }
 
     func sidebarFontSize() -> SettingsFontSize {
         SettingsFontSize(points: 12.5, minimum: 10, maximum: 20, defaultValue: 12.5)
@@ -662,7 +571,6 @@ public final class NoopSettingsHostActions: SettingsHostActions {
     public func openBrowserImportFlow() {}
     public func requestNotificationAuthorization() {}
     public func openTerminalConfigWindow() {}
-    public func openMobilePairingWindow() {}
     /// No-op notification sound preview used by tests, previews, and
     /// package-only settings hosts.
     public func previewNotificationSound(value: String, customFilePath: String) {}

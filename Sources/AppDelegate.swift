@@ -10,8 +10,6 @@ import CmuxTerminalCore
 import CmuxTerminal
 import CmuxSettings
 import CmuxSettingsUI
-import CmuxSudoBroker
-import CmuxSudoBrokerUI
 import CmuxWorkspaces
 import SwiftUI
 import Bonsplit
@@ -27,11 +25,6 @@ import Darwin
 import CmuxFoundation
 import CmuxSidebar
 import os
-
-private nonisolated let sudoApprovalLogger = Logger(
-    subsystem: "com.cmuxterm.app",
-    category: "SudoApproval"
-)
 
 private enum CmuxThemeNotifications {
     static let reloadConfig = Notification.Name("com.cmuxterm.themes.reload-config")
@@ -592,7 +585,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
         Self.cachedIsRunningUnderXCTest
     }
     private let cmuxThemePreviewReloadScheduler = MainActorDeferredActionScheduler()
-    private let sudoApprovalCoordinator: SudoApprovalCoordinator?
 
     @MainActor
     final class MainWindowContext {
@@ -1358,30 +1350,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
 
     override init() {
         let fileManager = FileManager.default
-        if let bundleIdentifier = Bundle.main.bundleIdentifier,
-           !bundleIdentifier.isEmpty,
-           let applicationSupportDirectory = fileManager.urls(
-               for: .applicationSupportDirectory,
-               in: .userDomainMask
-           ).first,
-           let runnerExecutableURL = Bundle.main.resourceURL?
-               .appendingPathComponent("bin/cmux", isDirectory: false),
-           fileManager.isExecutableFile(atPath: runnerExecutableURL.path) {
-            let broker = SudoBroker(
-                paths: SudoBrokerPaths(
-                    applicationSupportDirectory: applicationSupportDirectory,
-                    bundleIdentifier: bundleIdentifier
-                ),
-                runnerExecutableURL: runnerExecutableURL,
-                messages: .localized
-            )
-            sudoApprovalCoordinator = SudoApprovalCoordinator(
-                broker: broker,
-                presenter: SudoApprovalWindowPresenter()
-            )
-        } else {
-            sudoApprovalCoordinator = nil
-        }
         let hangDirectory = fileManager.urls(
             for: .libraryDirectory,
             in: .userDomainMask
@@ -1517,9 +1485,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
             syncActivationPolicy()
         }
         StartupBreadcrumbLog.append("appDelegate.didFinish.activationPolicy.synced")
-        if !isRunningUnderXCTest {
-            startSudoApprovalCoordinator()
-        }
         // Prewarm the restorable-agent index (see closedPanelHistoryEntry) and the agent
         // message journal off the main thread, so the first close or command palette open
         // after launch doesn't load either synchronously on main.
@@ -1864,7 +1829,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
 
     private func deferTerminateForOwnedCleanupAndFreshSnapshot(reason: String) -> Bool {
         let markedForKill: [UUID] = []
-        let hasSudoApprovalRuntime = sudoApprovalCoordinator?.requiresShutdown == true
         // A mirror that owes tmux a goodbye is owned cleanup too. Without this the app can quit
         // with the deferred phase never running, and the remote half keeps the tmux client —
         // along with the per-window size claims that pin those windows for everyone else.
@@ -1881,7 +1845,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
                     "windows": String(markedForKill.count),
                     "mirrorsOwingDetach": String(mirrorsOwingDetach),
                     "freshAgentIndex": "1",
-                    "sudoApproval": hasSudoApprovalRuntime ? "1" : "0",
                     "reason": reason,
                 ]
             )
@@ -1979,9 +1942,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
 
     private func prepareForConfirmedAppTermination() {
         isTerminatingApp = true
-        // Sudo broker observation and recovery must be released, but a slow
-        // recovery join must not delay session persistence or AppKit termination.
-        sudoApprovalCoordinator?.stopInBackgroundForTermination()
         // The terminate-later cleanup loads the authoritative agent index off-main and
         // persists it immediately before replying to AppKit.
         // The hard AppKit watchdog is armed immediately before the terminate
@@ -2168,7 +2128,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
         ghosttyCrashBreadcrumbTask = nil
         pendingCrashScanTask?.cancel()
         pendingCrashScanTask = nil
-        sudoApprovalCoordinator?.cancelForImmediateTermination()
         notificationStore?.clearAll()
         GhosttyCrashBreadcrumb.markCleanExit()
         unregisterDisplayReconfigurationCallbackIfNeeded()
@@ -2284,17 +2243,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
         }
         pendingCrashScanTask = task
         return task
-    }
-
-    private func startSudoApprovalCoordinator() {
-        sudoApprovalCoordinator?.start { error in
-            sudoApprovalLogger.error(
-                "startup failed: \(String(describing: error), privacy: .private)"
-            )
-#if DEBUG
-            cmuxDebugLog("sudo.approval.start failed error=\(String(describing: error))")
-#endif
-        }
     }
 
     private func scheduleGhosttyCrashBreadcrumbIfNeeded(notificationStore: TerminalNotificationStore) {

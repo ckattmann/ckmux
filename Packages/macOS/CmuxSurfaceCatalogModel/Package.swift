@@ -7,13 +7,12 @@ let package = Package(
     products: [.library(name: "CmuxSurfaceCatalogModel", targets: ["CmuxSurfaceCatalogModel"])],
     dependencies: [
         .package(path: "../CMUXDebugLog"),
-        .package(path: "../CmuxCore"),
-        .package(path: "../../Shared/CMUXMobileCore")
+        .package(path: "../CmuxCore")
     ],
     targets: [
         .target(
             name: "CmuxSurfaceCatalogModel",
-            dependencies: ["CMUXDebugLog", "CmuxCore", "CMUXMobileCore"],
+            dependencies: ["CMUXDebugLog", "CmuxCore"],
             // The files moved out of the app target unchanged; keep its language mode.
             swiftSettings: [.swiftLanguageMode(.v5)]
         ),

@@ -1,5 +1,4 @@
 import AppKit
-import CmuxFeedback
 import SwiftUI
 
 extension cmuxApp {
@@ -11,15 +10,10 @@ extension cmuxApp {
 
             Divider()
 
-            Button(String(localized: "cloud.diagnostics.menu", defaultValue: "Cloud Diagnostics…")) {
-            }
-
             splitCommandButton(title: String(localized: "sidebar.help.sendFeedback", defaultValue: "Send Feedback"), shortcut: menuShortcut(for: .sendFeedback)) {
                 presentFeedbackFromHelpMenu()
             }
 
-            Button(String(localized: "command.checkForUpdates.title", defaultValue: "Check for Updates")) {
-            }
 
             Divider()
 
@@ -101,13 +95,7 @@ extension cmuxApp {
     }
 
     private func presentFeedbackFromHelpMenu() {
-        if let targetWindow = NSApp.keyWindow ?? NSApp.mainWindow {
-            FeedbackComposerBridge().openComposer(in: targetWindow)
-            return
-        }
-
-        if let targetWindow = AppDelegate.shared?.showMainWindowFromMenuBar() {
-            FeedbackComposerBridge().openComposer(in: targetWindow)
-        }
+        guard let url = URL(string: "https://github.com/manaflow-ai/cmux/issues/new") else { return }
+        NSWorkspace.shared.open(url)
     }
 }

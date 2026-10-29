@@ -144,7 +144,6 @@ final class MenuBarExtraController: NSObject, NSMenuDelegate {
         caffeineItem.action = #selector(caffeineAction)
         menu.addItem(caffeineItem)
 
-        menu.addItem(MenuBarProfilingMenuItem.make())
         cloudSectionSeparator.isHidden = true
         menu.addItem(cloudSectionSeparator)
         menu.addItem(notificationListSeparator)

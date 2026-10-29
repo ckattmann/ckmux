@@ -2,8 +2,11 @@
 
 Personal, stripped-down fork of cmux (a Ghostty-based macOS terminal). Local terminals only:
 the in-app browser, SSH/remote tmux, cmux Cloud, accounts, iOS/phone pairing, simulator,
-Computer Use, git diff viewer, Chief, Canvas, Sentry/PostHog/Sparkle and all tests were removed.
-Only English localization remains.
+Computer Use, git diff viewer, Chief, Canvas, Sentry/PostHog/Sparkle, remote feature flags,
+feedback composer, menu-bar profiling, sudo broker, terminal import, herdr resume and all tests were
+removed. Only English localization remains. `Packages/Shared/CMUXMobileCore` survives as a small
+remnant: the terminal render-grid types (used for agent screen detection) and a no-op
+`DiagnosticLog`.
 
 ## Build and run
 
@@ -13,8 +16,10 @@ Only English localization remains.
   installed `/Applications/cmux.app`.
 - `scripts/dev.sh cli <args>` — bundled CLI against the debug socket; `scripts/dev.sh stop` quits it.
 - Opening `cmux.xcodeproj` in Xcode and pressing Run also works.
-- GhosttyKit is a prebuilt xcframework symlinked at `GhosttyKit.xcframework`
-  (`scripts/ensure-ghosttykit.sh` downloads it); the Zig build is skipped.
+- GhosttyKit is a prebuilt xcframework symlinked at `GhosttyKit.xcframework`;
+  `scripts/ensure-ghosttykit.sh` downloads the pinned build (sha in the script) when the link is
+  broken. `ghostty/` holds only `include/`, `src/shell-integration/` and `build.zig.zon`; the Zig
+  build is skipped (`CMUX_SKIP_ZIG_BUILD=1`).
 
 ## Layout
 

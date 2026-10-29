@@ -17,9 +17,8 @@ extension Array where Element == CuratedSettingEntry {
     /// a different set of entries pass their own array via
     /// ``SettingsSearchIndex/init(catalog:curatedEntries:)``.
     public static func cmuxDefault(catalog: SettingCatalog) -> [CuratedSettingEntry] {
-        appendingDevicesEntries(to: insertingBrowserMemorySaverEntries(between: [
+        insertingBrowserMemorySaverEntries(between: [
             // Account / integrations
-            .init(section: .account, id: "account", title: String(localized: "settings.section.account", defaultValue: "Account"), synonyms: "Account auth authentication login logout signin sign-in signout sign-out email user profile stack team"),
             .init(section: .automation, id: "claude-code", title: String(localized: "settings.automation.claudeCode", defaultValue: "Claude Code Integration"), synonyms: "Claude Code Integration automation.claudeCodeIntegration claude code hooks agent integration status notifications"),
             .init(section: .automation, id: "pi", title: String(localized: "settings.automation.pi", defaultValue: "Pi Integration", bundle: .module), paths: ["automation.piIntegration"], synonyms: "Pi Integration automation.piIntegration pi agent hooks notifications status"),
             .init(section: .automation, id: "claude-path", title: String(localized: "settings.automation.claudeCode.customPath", defaultValue: "Claude Binary Path"), synonyms: "Claude Binary Path automation.claudeBinaryPath claude binary executable path cli command custom"),
@@ -374,70 +373,6 @@ extension Array where Element == CuratedSettingEntry {
             .init(section: .sidebarAppearance, id: "right-max-width", title: String(localized: "settings.sidebar.rightMaxWidth", defaultValue: "Dock Max Width"), synonyms: "Dock Max Width sidebar.rightMaxWidth dock right sidebar max width terminal reservation cap logs lazygit"),
 
             // Mobile
-            .init(
-                section: .mobile,
-                id: "pairDevice",
-                title: String(localized: "settings.mobile.pairDevice", defaultValue: "Mobile Pairing"),
-                synonyms: """
-                pair pairing add device qr qr code scan iphone ipad ios mobile \
-                tailscale iroh connect onboarding sign in
-                """
-            ),
-            .init(
-                section: .mobile,
-                id: "phone-push-forwarding",
-                title: String(
-                    localized: "settings.mobile.phonePush.forwarding",
-                    defaultValue: "Forward Notifications to iPhone"
-                ),
-                detailText: String(localized: "settings.mobile.phonePush.forwarding.subtitle", defaultValue: "Sends agent notifications from this Mac to cmux on iPhone and iPad."),
-                synonyms: "push notifications iphone ipad mobile forwarding agent alerts forwardNotificationsToPhone"
-            ),
-            .init(
-                section: .mobile,
-                id: "phone-push-mode",
-                title: String(
-                    localized: "settings.mobile.phonePush.mode",
-                    defaultValue: "When to Send"
-                ),
-                detailText: String(
-                    localized: "settings.mobile.phonePush.mode.subtitle",
-                    defaultValue: "Always sends every local agent alert. Away mode waits until this Mac is locked, asleep, or idle."
-                ),
-                synonyms: "push notification forwarding always only when away locked asleep idle forwardNotificationsToPhoneMode"
-            ),
-            .init(
-                section: .mobile,
-                id: "phone-push-hide-content",
-                title: String(
-                    localized: "settings.mobile.phonePush.hideContent",
-                    defaultValue: "Hide Notification Content"
-                ),
-                detailText: String(
-                    localized: "settings.mobile.phonePush.hideContent.subtitle",
-                    defaultValue: "Sends a generic message instead of agent and terminal text."
-                ),
-                synonyms: "push notification privacy hide content generic message terminal text forwardNotificationsHideContent"
-            ),
-            .init(section: .mobile, id: "iOSPairingHost", title: String(localized: "settings.mobile.iOSPairingHost", defaultValue: "iOS Pairing"), synonyms: "iOS Pairing ios iphone ipad mobile pairing local network permission sync"),
-            .init(section: .mobile, id: "iOSPairingPort", title: String(localized: "settings.mobile.port", defaultValue: "Pairing Port"), synonyms: "mobile.iOSPairingHost.port ios iphone mobile pairing port tcp listener firewall conflict"),
-            .init(section: .mobile, id: "iOSPairingDisplayName", title: String(localized: "settings.mobile.displayName", defaultValue: "Display Name"), synonyms: "mobile.iOSPairingHost.displayName ios iphone mobile pairing display name mac hostname device label"),
-            .init(
-                section: .mobile,
-                id: "artifactFolderAccess",
-                title: String(localized: "settings.mobile.artifactFolderAccess", defaultValue: "Folder Access"),
-                detailText: String(localized: "settings.mobile.artifactFolderAccess.subtitle", defaultValue: "Choose how much of a folder iPhone and iPad can browse. One Level shows only the items directly inside it."),
-                paths: ["mobile.artifactFolderAccess"],
-                synonyms: "ios iphone ipad mobile files folders directory subtree one level authorization security"
-            ),
-            .init(
-                section: .mobile,
-                id: "browserTunnelAllowOtherHosts",
-                title: String(localized: "settings.mobile.browserTunnel.allowOtherHosts", defaultValue: "iOS Browser Reaches Other Hosts"),
-                detailText: String(localized: "settings.mobile.browserTunnel.allowOtherHosts.subtitleOff", defaultValue: "The iOS browser reaches only this Mac's localhost through this Mac. Other sites load over the phone's own network."),
-                paths: ["mobile.browserTunnel.allowOtherHosts"],
-                synonyms: "ios iphone ipad mobile browser on iphone tunnel proxy localhost lan vpn internet hosts network security"
-            ),
 
             // Custom Sidebars
             .init(section: .customSidebars, id: "enabled", title: String(localized: "settings.customSidebars.enabled", defaultValue: "Show Custom Sidebars"), synonyms: "custom sidebars enable show vibe swift json interpreted picker beta"),
@@ -595,7 +530,7 @@ extension Array where Element == CuratedSettingEntry {
 
             // Reset
             .init(section: .reset, id: "reset-all", title: String(localized: "settings.reset.resetAll", defaultValue: "Reset All Settings"), synonyms: "Reset All Settings factory reset restore defaults clear preferences"),
-        ])) + terminalGhosttyOptionEntries + sidebarAgentUsageEntries
+        ]) + terminalGhosttyOptionEntries + sidebarAgentUsageEntries
     }
 
     private static var keyboardShortcutActionSynonyms: String {

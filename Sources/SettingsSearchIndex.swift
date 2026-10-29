@@ -1,7 +1,7 @@
 import SwiftUI
 
 enum SettingsSearchIndex {
-    static let defaultSelectionID = sectionID(for: .account)
+    static let defaultSelectionID = sectionID(for: .app)
 
     private static let sectionEntries: [SettingsSearchEntry] = SettingsNavigationTarget.allCases.map { target in
         SettingsSearchEntry(
@@ -16,8 +16,6 @@ enum SettingsSearchIndex {
     }
 
     private static let settingEntries: [SettingsSearchEntry] = [
-        setting(.account, "account", String(localized: "settings.section.account", defaultValue: "Account"), "sign in login team sync user profile"),
-        setting(.account, "pro", String(localized: "settings.account.pro.title", defaultValue: "cmux Pro"), "pro upgrade subscription billing plan pricing cloud"),
         setting(.app, "language", String(localized: "settings.app.language", defaultValue: "Language"), "locale translation japanese english restart"),
         setting(.themes, "appearance", String(localized: "settings.app.appearance", defaultValue: "Appearance"), "theme light dark system"),
         setting(.themes, "accent-color", String(localized: "settings.app.accentColor", defaultValue: "Accent Color"), "accent highlight tint blue system"),

@@ -5,7 +5,6 @@ import CmuxAgentJournal
 import CmuxControlSocket
 import CmuxFoundation
 import CmuxSettings
-import CmuxSudoBroker
 import CoreFoundation
 import CryptoKit
 import Darwin
@@ -6082,17 +6081,7 @@ struct CMUXCLI {
             )
             return
         }
-        if command == SudoPrivilegedExecutor.hiddenCommand {
-            Darwin.exit(runHiddenSudoPrivilegedExecutor(commandArgs: rawCommandArgs))
-        }
-        if command == SudoExecutionRunner.hiddenCommand {
-            Darwin.exit(runHiddenSudoRunner(commandArgs: rawCommandArgs))
-        }; if command == "__restore-lease-watch" { runRestoreLeaseWatcher(commandArgs: rawCommandArgs) }
-        if command == "sudo" {
-            let exitCode = try runSudoCommand(commandArgs: rawCommandArgs)
-            if exitCode != 0 { Darwin.exit(exitCode) }
-            return
-        }
+        if command == "__restore-lease-watch" { runRestoreLeaseWatcher(commandArgs: rawCommandArgs) }
         let passesThroughProviderArguments = managedProviderArgumentsPassThrough(command: command)
         let presentationOptions: (jsonOutput: Bool, idFormat: String?, remaining: [String])
         if passesThroughProviderArguments {
@@ -6369,16 +6358,6 @@ struct CMUXCLI {
             return
         }
 
-        if command == "import" {
-            try runImport(
-                commandArgs: commandArgs,
-                jsonOutput: jsonOutput,
-                socketPath: resolvedSocketPath,
-                explicitPassword: socketPasswordArg
-            )
-            return
-        }
-
         if command == "claude-teams" {
             try runClaudeTeams(
                 commandArgs: commandArgs,
@@ -6542,19 +6521,6 @@ struct CMUXCLI {
             try validateNotificationCommandArguments(command: command, args: commandArgs)
         }
         try prepareStandardInputBeforeSocket(command: command, commandArgs: commandArgs)
-        let isAuthCommand = ["auth", "login", "logout"].contains(command)
-        let authUsage = String(
-            localized: "cli.auth.usage",
-            defaultValue: "Usage: cmux auth <status|login|logout|team>"
-        )
-        var authSubcommand: String?
-        if isAuthCommand {
-            let authArgs = command == "auth" ? commandArgs : [command] + commandArgs
-            authSubcommand = CmuxCLIArgumentParser().parseAuthSubcommand(authArgs)
-            if authSubcommand == nil {
-                throw CLIError(message: authUsage)
-            }
-        }
         var client = SocketClient(path: resolvedSocketPath)
         let defersSocketConnection = Self.commandDefersSocketConnectionUntilRequest(
             command: command,
