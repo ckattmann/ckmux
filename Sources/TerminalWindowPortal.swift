@@ -1587,6 +1587,7 @@ final class WindowTerminalPortal: NSObject {
             // views pinned at plan+175pt for minutes, full_hierarchy_sync in
             // the thousands per settle window). Frames written manually from
             // actual bounds cannot diverge from actual bounds.
+            container.addSubview(hostView, positioned: .above, relativeTo: reference)
             installedContainerView = container
             installedReferenceView = reference
             installReferenceGeometryObservers(reference: reference)

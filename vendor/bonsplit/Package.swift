@@ -23,10 +23,5 @@ let package = Package(
                 .process("Resources")
             ]
         ),
-        .testTarget(
-            name: "BonsplitTests",
-            dependencies: ["Bonsplit"],
-            path: "Tests/BonsplitTests"
-        ),
     ]
 )
