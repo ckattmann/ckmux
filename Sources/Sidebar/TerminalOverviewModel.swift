@@ -1,3 +1,4 @@
+import Bonsplit
 import Combine
 import CmuxSidebar
 import CmuxWorkspaces
@@ -10,37 +11,35 @@ struct TerminalOverviewRow: Identifiable, Equatable {
         case running
     }
 
+    struct AgentStatus: Equatable {
+        let text: String
+        let icon: String?
+        let colorHex: String?
+    }
+
     let id: UUID
     let workspaceId: UUID
     let title: String
     let workspaceTitle: String
     let directory: String?
     let groupId: UUID?
-    let isSelectedWorkspace: Bool
     let isFocused: Bool
     let activity: Activity
-    let gitBranch: String?
-    let gitIsDirty: Bool
-    let pullRequestNumber: Int?
-    let pullRequestURL: URL?
-    let ports: [Int]
-    let agentSource: String?
-    let agentState: String?
-    let lastPrompt: String?
-    let lastPromptAt: Date?
-    let isRemote: Bool
+    let agentStatus: AgentStatus?
+    let status: TabStatus?
+    let createdAt: Date
 }
 
-struct TerminalOverviewSection: Identifiable, Equatable {
-    let id: UUID?
-    let name: String?
-    let colorHex: String?
+struct TerminalOverviewWorkspaceSection: Identifiable, Equatable {
+    let id: UUID
+    let title: String
+    let isSelected: Bool
     let rows: [TerminalOverviewRow]
 }
 
 @MainActor
 final class TerminalOverviewModel: ObservableObject {
-    @Published private(set) var sections: [TerminalOverviewSection] = []
+    @Published private(set) var sections: [TerminalOverviewWorkspaceSection] = []
     @Published private(set) var groups: [WorkspaceGroupMenuSnapshot.Item] = []
 
     private weak var tabManager: TabManager?
@@ -48,6 +47,10 @@ final class TerminalOverviewModel: ObservableObject {
     private var workspaceCancellables: [AnyCancellable] = []
     private var refreshTimer: Timer?
     private var isRebuildScheduled = false
+
+    var newestFirstRows: [TerminalOverviewRow] {
+        sections.flatMap(\.rows).sorted { $0.createdAt > $1.createdAt }
+    }
 
     func attach(_ tabManager: TabManager) {
         guard self.tabManager !== tabManager || managerCancellables.isEmpty else { return }
@@ -112,30 +115,29 @@ final class TerminalOverviewModel: ObservableObject {
         let knownGroupIds = Set(workspaceGroups.map(\.id))
         let selectedWorkspaceId = tabManager.selectedTabId
 
-        var rowsByGroupId: [UUID?: [TerminalOverviewRow]] = [:]
-        for workspace in tabManager.tabs {
+        let nextSections = tabManager.tabs.compactMap { workspace -> TerminalOverviewWorkspaceSection? in
             let groupId = groupIdByAnchor[workspace.id]
                 ?? workspace.groupId.flatMap { knownGroupIds.contains($0) ? $0 : nil }
             let isSelectedWorkspace = workspace.id == selectedWorkspaceId
             let focusedPanelId = workspace.focusedPanelId
-            for panelId in workspace.orderedPanelIds {
-                guard let terminal = workspace.panels[panelId] as? TerminalPanel else { continue }
-                rowsByGroupId[groupId, default: []].append(row(
+            let workspaceTitle = tabManager.resolvedWorkspaceWindowTitle(for: workspace)
+            let rows = workspace.orderedPanelIds.compactMap { panelId -> TerminalOverviewRow? in
+                guard let terminal = workspace.panels[panelId] as? TerminalPanel else { return nil }
+                return row(
                     terminal: terminal,
                     in: workspace,
+                    workspaceTitle: workspaceTitle,
                     groupId: groupId,
-                    isSelectedWorkspace: isSelectedWorkspace,
                     isFocused: isSelectedWorkspace && focusedPanelId == panelId
-                ))
+                )
             }
-        }
-
-        var nextSections = workspaceGroups.compactMap { group -> TerminalOverviewSection? in
-            guard let rows = rowsByGroupId[group.id], !rows.isEmpty else { return nil }
-            return TerminalOverviewSection(id: group.id, name: group.name, colorHex: group.customColor, rows: rows)
-        }
-        if let ungroupedRows = rowsByGroupId[UUID?.none], !ungroupedRows.isEmpty {
-            nextSections.append(TerminalOverviewSection(id: nil, name: nil, colorHex: nil, rows: ungroupedRows))
+            guard !rows.isEmpty else { return nil }
+            return TerminalOverviewWorkspaceSection(
+                id: workspace.id,
+                title: workspaceTitle,
+                isSelected: isSelectedWorkspace,
+                rows: rows
+            )
         }
         let nextGroups = workspaceGroups.map { WorkspaceGroupMenuSnapshot.Item(id: $0.id, name: $0.name) }
         if sections != nextSections { sections = nextSections }
@@ -145,8 +147,8 @@ final class TerminalOverviewModel: ObservableObject {
     private func row(
         terminal: TerminalPanel,
         in workspace: Workspace,
+        workspaceTitle: String,
         groupId: UUID?,
-        isSelectedWorkspace: Bool,
         isFocused: Bool
     ) -> TerminalOverviewRow {
         let panelId = terminal.id
@@ -160,30 +162,21 @@ final class TerminalOverviewModel: ObservableObject {
         case .commandRunning: activity = .running
         case .unknown, nil: activity = .unknown
         }
-        let branch = workspace.panelGitBranches[panelId]
-        let pullRequest = workspace.panelPullRequests[panelId]
-        let prompt = workspace.panelPrompts[panelId]
-        let agent: (source: String?, state: String?)? = nil
+        let agentStatus = workspace.agentStatusEntriesByPanelId[panelId]?.values
+            .max { $0.priority < $1.priority }
+            .map { TerminalOverviewRow.AgentStatus(text: $0.value, icon: $0.icon, colorHex: $0.color) }
         return TerminalOverviewRow(
             id: panelId,
             workspaceId: workspace.id,
             title: workspace.panelTitle(panelId: panelId) ?? terminal.displayTitle,
-            workspaceTitle: workspace.customTitle ?? workspace.title,
+            workspaceTitle: workspaceTitle,
             directory: directory,
             groupId: groupId,
-            isSelectedWorkspace: isSelectedWorkspace,
             isFocused: isFocused,
             activity: activity,
-            gitBranch: branch?.branch,
-            gitIsDirty: branch?.isDirty ?? false,
-            pullRequestNumber: pullRequest?.number,
-            pullRequestURL: pullRequest?.url,
-            ports: (workspace.surfaceListeningPorts[panelId] ?? []).sorted(),
-            agentSource: agent?.source,
-            agentState: agent?.state,
-            lastPrompt: prompt?.message,
-            lastPromptAt: prompt?.submittedAt,
-            isRemote: workspace.isRemoteWorkspace
+            agentStatus: agentStatus,
+            status: workspace.terminalTabStatus(forPanelId: panelId),
+            createdAt: terminal.createdAt
         )
     }
 }

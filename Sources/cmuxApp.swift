@@ -699,11 +699,6 @@ struct cmuxApp: App {
 
 
 
-                if CmuxFeatureFlags.shared.isSimulatorEnabled {
-                    Button(String(localized: "menu.file.newSimulatorPane", defaultValue: "New Simulator Pane")) {
-                    }
-                }
-
                 splitCommandButton(title: String(localized: "menu.file.newWorkspaceGroup", defaultValue: "New Workspace Group"), shortcut: menuShortcut(for: .newWorkspaceGroup)) {
                     _ = AppDelegate.shared?.createEmptyWorkspaceGroup(
                         tabManager: activeTabManager,
@@ -740,7 +735,7 @@ struct cmuxApp: App {
                     closePanelOrWindow()
                 }
 
-                splitCommandButton(title: String(localized: "menu.file.closeOtherTabs", defaultValue: "Close Other Tabs in Pane"), shortcut: menuShortcut(for: .closeOtherTabsInPane)) {
+                splitCommandButton(title: String(localized: "menu.file.closeOtherTabs", defaultValue: "Close Other Tabs"), shortcut: menuShortcut(for: .closeOtherTabsInPane)) {
                     closeOtherTabsInFocusedPane()
                 }
                 .disabled(!activeTabManager.canCloseOtherTabsInFocusedPane())
@@ -879,41 +874,7 @@ struct cmuxApp: App {
             }
             Divider()
             surfaceNavigationCommandButtons()
-            splitCommandButton(title: String(localized: "menu.view.back", defaultValue: "Back"), shortcut: menuShortcut(for: .browserBack)) {
-            }
-
-            splitCommandButton(title: String(localized: "menu.view.forward", defaultValue: "Forward"), shortcut: menuShortcut(for: .browserForward)) {
-            }
-
-            splitCommandButton(title: String(localized: "menu.view.reloadPage", defaultValue: "Reload Page"), shortcut: menuShortcut(for: .browserReload)) {
-            }
-
-            splitCommandButton(title: String(localized: "menu.view.toggleDevTools", defaultValue: "Toggle Developer Tools"), shortcut: menuShortcut(for: .toggleBrowserDeveloperTools)) {
-            }
-            splitCommandButton(title: String(localized: "menu.view.showJSConsole", defaultValue: "Show JavaScript Console"), shortcut: menuShortcut(for: .showBrowserJavaScriptConsole)) {
-            }
-            splitCommandButton(title: String(localized: "menu.view.toggleReactGrab", defaultValue: "Toggle React Grab"), shortcut: menuShortcut(for: .toggleReactGrab)) {
-            }
-            splitCommandButton(title: String(localized: "menu.view.toggleDesignMode", defaultValue: "Toggle Design Mode"), shortcut: menuShortcut(for: .toggleBrowserDesignMode)) {
-            }
-            splitCommandButton(title: String(localized: "menu.view.zoomIn", defaultValue: "Zoom In"), shortcut: menuShortcut(for: .browserZoomIn)) {
-            }
-
-            splitCommandButton(title: String(localized: "menu.view.zoomOut", defaultValue: "Zoom Out"), shortcut: menuShortcut(for: .browserZoomOut)) {
-            }
-
-            splitCommandButton(title: String(localized: "menu.view.actualSize", defaultValue: "Actual Size"), shortcut: menuShortcut(for: .browserZoomReset)) {
-            }
             FilePreviewWordWrapMenu(shortcut: menuShortcut(for: .toggleFileEditorWordWrap), target: { appDelegate.shortcutFocusedSavingTextView(in: NSApp.keyWindow ?? NSApp.mainWindow) })
-            Button(String(localized: "menu.view.clearBrowserHistory", defaultValue: "Clear Browser History")) {
-            }
-
-            Button(String(localized: "menu.view.importFromBrowser", defaultValue: "Import Browser Data…")) {
-                // Defer modal presentation until after AppKit finishes menu tracking.
-                DispatchQueue.main.async {
-                }
-            }
-
             splitCommandButton(title: String(localized: "menu.view.nextWorkspace", defaultValue: "Next Workspace"), shortcut: menuShortcut(for: .nextSidebarTab)) {
                 activeTabManager.selectNextTab()
             }
@@ -938,32 +899,6 @@ struct cmuxApp: App {
             splitCommandButton(title: String(localized: "command.toggleFullScreen.title", defaultValue: "Toggle Full Screen"), shortcut: menuShortcut(for: .toggleFullScreen)) {
                 guard let targetWindow = NSApp.keyWindow ?? NSApp.mainWindow else { return }
                 targetWindow.toggleFullScreen(nil)
-            }
-
-            Divider()
-
-            splitCommandButton(title: String(localized: "menu.view.splitRight", defaultValue: "Split Right"), shortcut: menuShortcut(for: .splitRight)) {
-                performSplitFromMenu(direction: .right)
-            }
-
-            splitCommandButton(title: String(localized: "menu.view.splitDown", defaultValue: "Split Down"), shortcut: menuShortcut(for: .splitDown)) {
-                performSplitFromMenu(direction: .down)
-            }
-
-
-            paneSizingCommandButtons()
-            Divider()
-
-            splitCommandButton(title: String(localized: "menu.view.toggleCanvasLayout", defaultValue: "Toggle Canvas Layout"), shortcut: menuShortcut(for: .toggleCanvasLayout)) {
-                guard let workspace = activeTabManager.selectedWorkspace else { return }
-            }
-
-            splitCommandButton(title: String(localized: "menu.view.canvasOverview", defaultValue: "Canvas Overview"), shortcut: menuShortcut(for: .canvasOverview)) {
-                guard let workspace = activeTabManager.selectedWorkspace else { return }
-            }
-
-            splitCommandButton(title: String(localized: "menu.view.canvasTidy", defaultValue: "Tidy Canvas"), shortcut: menuShortcut(for: .canvasTidy)) {
-                guard let workspace = activeTabManager.selectedWorkspace else { return }
             }
 
             Divider()
@@ -3522,7 +3457,7 @@ private struct TabBarBackdropLabSample: View {
 
     private static func makeConfiguration(for variant: TabBarBackdropLabVariant) -> BonsplitConfiguration {
         BonsplitConfiguration(
-            allowSplits: true,
+            allowSplits: false,
             allowCloseTabs: true,
             allowTabReordering: false,
             allowCrossPaneTabMove: false,

@@ -345,33 +345,6 @@ final class WindowDecorationsController {
             switch slot {
             case .toggleSidebar:
                 context.sidebarState.toggle()
-            case .showNotifications:
-                let resolvedAnchorView = NotificationsAnchorRegistry.shared.closestAnchor(
-                    in: window,
-                    to: locationInWindow
-                ) ?? anchorView
-                appDelegate.toggleNotificationsPopover(animated: true, anchorView: resolvedAnchorView)
-            case .newTab:
-                _ = appDelegate.performNewWorkspaceAction(
-                    tabManager: context.tabManager,
-                    debugSource: "titlebar.minimalSidebarControl",
-                    localOnly: true
-                )
-            case .newWorkspaceMenu:
-                if let anchorView {
-                    _ = appDelegate.showNewWorkspaceContextMenu(
-                        anchorView: anchorView,
-                        debugSource: "titlebar.minimalSidebarControl.newWorkspaceMenu"
-                    )
-                } else if let contentView = window.contentView {
-                    // Window-monitor path: no control view exists yet, so drop
-                    // the menu where the click landed.
-                    _ = appDelegate.showNewWorkspaceContextMenu(
-                        anchorView: contentView,
-                        at: contentView.convert(locationInWindow, from: nil),
-                        debugSource: "titlebar.minimalSidebarControl.newWorkspaceMenu"
-                    )
-                }
             case .focusHistoryBack:
                 guard context.tabManager.canNavigateBack else { return }
                 context.tabManager.navigateBack()

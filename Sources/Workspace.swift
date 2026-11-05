@@ -1249,9 +1249,26 @@ extension Workspace {
             return []
         }
 
+        guard bonsplitController.configuration.allowSplits else {
+            return [SessionPaneRestoreEntry(paneId: rootPaneId, snapshot: Self.mergedPaneSnapshot(layout))]
+        }
         var leaves: [SessionPaneRestoreEntry] = []
         restoreSessionLayoutNode(layout, inPane: rootPaneId, leaves: &leaves)
         return leaves
+    }
+
+    private static func mergedPaneSnapshot(_ node: SessionWorkspaceLayoutSnapshot) -> SessionPaneLayoutSnapshot {
+        switch node {
+        case .pane(let pane):
+            return pane
+        case .split(let split):
+            let first = mergedPaneSnapshot(split.first)
+            let second = mergedPaneSnapshot(split.second)
+            return SessionPaneLayoutSnapshot(
+                panelIds: first.panelIds + second.panelIds,
+                selectedPanelId: first.selectedPanelId ?? second.selectedPanelId
+            )
+        }
     }
 
     private func restoreSessionLayoutNode(
@@ -2639,6 +2656,7 @@ final class Workspace: Identifiable, ObservableObject, FilePreviewTabMetadataHos
     private(set) var stableId = UUID()
     /// Durable idempotency key for task-composer workspace creation.
     var taskCreateOperationID: UUID?
+    var offersInitialFolderChoice = false
     private var forkAgentConversationInFlightPanelIds: Set<UUID> = []
 
     func beginForkAgentConversationAction(panelId: UUID) -> Bool {
@@ -3080,7 +3098,14 @@ final class Workspace: Identifiable, ObservableObject, FilePreviewTabMetadataHos
     /// panel then status key. `statusEntries` keeps one entry per key (last
     /// writer wins), so two panes running the same agent would otherwise hide
     /// each other; the row resolves the most urgent pane from these instead.
-    var agentStatusEntriesByPanelId: [UUID: [String: SidebarStatusEntry]] = [:]
+    var agentStatusEntriesByPanelId: [UUID: [String: SidebarStatusEntry]] = [:] {
+        didSet {
+            for panelId in Set(oldValue.keys).union(agentStatusEntriesByPanelId.keys)
+            where oldValue[panelId] != agentStatusEntriesByPanelId[panelId] {
+                syncTerminalTabAgentIconAsset(forPanelId: panelId)
+            }
+        }
+    }
     var programStatusStoresByPanelId: [UUID: ProgramStatusRecordStore] = [:]
     var programStatusUrgencyByPanelId: [UUID: Int] = [:]
     /// One pending agent turn settlement per panel and status key; see
@@ -3891,7 +3916,7 @@ final class Workspace: Identifiable, ObservableObject, FilePreviewTabMetadataHos
             ),
             increaseContrast: DisplayAccessibilityOptions.current.increaseContrast
         )
-        return BonsplitConfiguration.Appearance(
+        var appearance = BonsplitConfiguration.Appearance(
             tabBarHeight: WindowChromeMetrics.bonsplitTabBarHeight,
             tabTitleFontSize: tabTitleFontSize,
             dividerHitExpansion: PortalSplitDividerRegion.dividerHitExpansion,
@@ -3901,6 +3926,8 @@ final class Workspace: Identifiable, ObservableObject, FilePreviewTabMetadataHos
             chromeColors: chromeColors,
             usesSharedBackdrop: sharesWindowBackdrop
         )
+        appearance.wrapsTabsIntoRows = true
+        return appearance
     }
 
     func applyGhosttyChrome(from config: GhosttyConfig, reason: String = "unspecified") {
@@ -4107,7 +4134,7 @@ final class Workspace: Identifiable, ObservableObject, FilePreviewTabMetadataHos
             tabTitleFontSize: initialGhosttyConfig.surfaceTabBarFontSize
         )
         let config = BonsplitConfiguration(
-            allowSplits: true,
+            allowSplits: false,
             allowCloseTabs: !CloseTabWarningStore(defaults: closeTabWarningDefaults).hidesTabCloseButton,
             allowCloseLastPane: false,
             allowTabReordering: true,
@@ -5513,7 +5540,7 @@ final class Workspace: Identifiable, ObservableObject, FilePreviewTabMetadataHos
         }
         let previousPresentedDirectory = presentedCurrentDirectory
         let isRemoteTerminalReport = isRemoteTerminalSurface(panelId)
-        if source == .liveReport {
+        if source == .liveReport, isRemoteTerminalReport {
             return false
         }
         let routedRemoteReport = source == .remoteReport && !allowsLocalDirectoryFallback(panelId: panelId)
@@ -5589,6 +5616,8 @@ final class Workspace: Identifiable, ObservableObject, FilePreviewTabMetadataHos
         if let terminalPanel = panels[panelId] as? TerminalPanel {
             terminalPanel.updateShellActivityState(state)
         }
+        syncTerminalTabStatus(forPanelId: panelId)
+        sidebarAgentRuntimeObservation.shellActivityDidChange()
         if let restoredAgent = restoredAgentSnapshotsByPanelId[panelId] {
             updateRestoredAgentResumeState(
                 panelId: panelId,
@@ -8848,12 +8877,6 @@ final class Workspace: Identifiable, ObservableObject, FilePreviewTabMetadataHos
     }
 
     func requestCloseTab(_ tabId: TabID, force: Bool) -> Bool {
-        // Chief Home is the workspace's canonical anchor. Its split tab is
-        // intentionally pinned (which hides Bonsplit's close affordance), but
-        // keep this guard for force/API paths that bypass the tab chrome.
-        if let panelId = panelIdFromSurfaceId(tabId) {
-            return false
-        }
         if force { forceCloseTabIds.insert(tabId) }
         let closed = bonsplitController.closeTab(tabId); if force && !closed { forceCloseTabIds.remove(tabId) }
         return closed
@@ -11621,11 +11644,6 @@ extension Workspace: BonsplitDelegate {
     }
 
     func splitTabBar(_ controller: BonsplitController, shouldCloseTab tab: Bonsplit.Tab, inPane pane: PaneID) -> Bool {
-        // Pinned protects normal Bonsplit UI; this delegate guard covers
-        // callers that ask the controller to close directly.
-        if let panelId = panelIdFromSurfaceId(tab.id) {
-            return false
-        }
         func recordPostCloseState() {
             let tabs = controller.tabs(inPane: pane)
             // Only a close that takes the zoomed pane with it ends the zoom. While

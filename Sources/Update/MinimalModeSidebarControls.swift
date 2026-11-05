@@ -41,38 +41,19 @@ enum TitlebarControlsHitRegions {
         for slot: MinimalModeSidebarControlActionSlot,
         config: TitlebarControlsStyleConfig
     ) -> ClosedRange<CGFloat>? {
-        let startX = outerLeadingPadding + config.groupPadding.leading
-        let sidebarX = startX
-        let notificationsX = sidebarX + config.buttonSize + config.spacing
-        let newTabX = notificationsX + config.buttonSize + config.spacing
-        let newTabWidth = TitlebarNewWorkspaceSplitButtonMetrics.primaryWidth(config: config)
-        let newWorkspaceMenuX = newTabX + newTabWidth
-        let newWorkspaceMenuWidth = TitlebarNewWorkspaceSplitButtonMetrics.dropdownWidth(config: config)
-        let focusBackX = newWorkspaceMenuX + newWorkspaceMenuWidth + config.spacing
+        let sidebarX = outerLeadingPadding + config.groupPadding.leading
+        let focusBackX = sidebarX + config.buttonSize + config.spacing
         let focusForwardX = focusBackX + config.buttonSize + config.spacing
 
         let minX: CGFloat = switch slot {
         case .toggleSidebar:
             sidebarX
-        case .showNotifications:
-            notificationsX
-        case .newTab:
-            newTabX
-        case .newWorkspaceMenu:
-            newWorkspaceMenuX
         case .focusHistoryBack:
             focusBackX
         case .focusHistoryForward:
             focusForwardX
         }
-        let width: CGFloat = switch slot {
-        case .newTab:
-            newTabWidth
-        case .newWorkspaceMenu:
-            newWorkspaceMenuWidth
-        case .toggleSidebar, .showNotifications, .focusHistoryBack, .focusHistoryForward:
-            config.buttonSize
-        }
+        let width = config.buttonSize
         return minX...(minX + width)
     }
 
@@ -228,20 +209,10 @@ final class MinimalModeSidebarControlActionView: NSView {
         switch slot {
         case .toggleSidebar:
             CmuxExtensionSidebarSelection.showMenu(anchorView: self, event: event)
-        case .newTab:
-            _ = AppDelegate.shared?.showNewWorkspaceContextMenu(anchorView: self, event: event)
-        case .newWorkspaceMenu:
-            _ = AppDelegate.shared?.showNewWorkspaceContextMenu(
-                anchorView: self,
-                event: event,
-                debugSource: "titlebar.minimalSidebar.newWorkspaceMenu.rightClick"
-            )
         case .focusHistoryBack:
             _ = AppDelegate.shared?.showFocusHistoryContextMenu(anchorView: self, event: event, direction: .back)
         case .focusHistoryForward:
             _ = AppDelegate.shared?.showFocusHistoryContextMenu(anchorView: self, event: event, direction: .forward)
-        case .showNotifications:
-            super.rightMouseDown(with: event)
         }
     }
 

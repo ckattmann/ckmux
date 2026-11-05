@@ -56,13 +56,11 @@ extension cmuxApp {
         helpResourceButton(.dock)
         helpResourceButton(.keyboardShortcuts)
         helpResourceButton(.apiReference)
-        helpResourceButton(.browserAutomation)
     }
 
     @ViewBuilder
     private var secondaryDocsHelpMenuItems: some View {
         helpResourceButton(.notifications)
-        helpResourceButton(.ssh)
         helpResourceButton(.skills)
         agentIntegrationsHelpMenu
         helpResourceButton(.changelog)

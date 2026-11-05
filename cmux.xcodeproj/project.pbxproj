@@ -194,6 +194,8 @@
 		FF940D2B29BB4FF1B39E459C /* AppDelegate+MoveTerminalToWorkspaceGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = E57F37F3AE794026A810A620 /* AppDelegate+MoveTerminalToWorkspaceGroup.swift */; };
 		D77690000000000000000001 /* AppDelegate+MultiWindowNotificationUITestFixture.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77690000000000000000002 /* AppDelegate+MultiWindowNotificationUITestFixture.swift */; };
 		A5FB1301 /* AppDelegate+NewWorkspaceContextMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5FB1302 /* AppDelegate+NewWorkspaceContextMenu.swift */; };
+		C7A1F00300000000000000A1 /* WorkspaceFolderPresetRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7A1F00400000000000000A1 /* WorkspaceFolderPresetRow.swift */; };
+		C7A1F00100000000000000A1 /* AppDelegate+AgentPromptURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7A1F00200000000000000A1 /* AppDelegate+AgentPromptURL.swift */; };
 		C0DE77060000000000000001 /* AppDelegate+NewWorkspaceMenuRendering.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE77060000000000000002 /* AppDelegate+NewWorkspaceMenuRendering.swift */; };
 		737100000000000000000003 /* AppDelegate+NonInteractiveWindowClose.swift in Sources */ = {isa = PBXBuildFile; fileRef = 737100000000000000000004 /* AppDelegate+NonInteractiveWindowClose.swift */; };
 		4EDE10010000000000000001 /* AppDelegate+NotificationDeliverySeams.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EDE10010000000000000002 /* AppDelegate+NotificationDeliverySeams.swift */; };
@@ -1713,6 +1715,7 @@
 		C0DE6B420000000000000001 /* TerminalPanelTextBoxState.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DE6B420000000000000002 /* TerminalPanelTextBoxState.swift */; };
 		6819AF60AEA6455DB57CC7FE /* TerminalPanelUnavailableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 811B03E4004A4D1FB6650158 /* TerminalPanelUnavailableView.swift */; };
 		A5001403 /* TerminalPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5001413 /* TerminalPanelView.swift */; };
+		C7A1F00500000000000000A1 /* TerminalSessionLinksBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7A1F00600000000000000A1 /* TerminalSessionLinksBar.swift */; };
 		B88351000000000000000001 /* TerminalPasteboardReadRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = B88351000000000000000002 /* TerminalPasteboardReadRequest.swift */; };
 		B8835B000000000000000003 /* TerminalPasteFailureNotice.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8835B000000000000000004 /* TerminalPasteFailureNotice.swift */; };
 		B8835B000000000000000005 /* TerminalPasteFailureNoticePresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8835B000000000000000006 /* TerminalPasteFailureNoticePresenter.swift */; };
@@ -2324,6 +2327,8 @@
 		E57F37F3AE794026A810A620 /* AppDelegate+MoveTerminalToWorkspaceGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+MoveTerminalToWorkspaceGroup.swift"; sourceTree = "<group>"; };
 		D77690000000000000000002 /* AppDelegate+MultiWindowNotificationUITestFixture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "App/AppDelegate+MultiWindowNotificationUITestFixture.swift"; sourceTree = "<group>"; };
 		A5FB1302 /* AppDelegate+NewWorkspaceContextMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+NewWorkspaceContextMenu.swift"; sourceTree = "<group>"; };
+		C7A1F00400000000000000A1 /* WorkspaceFolderPresetRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WorkspaceFolderPresetRow.swift"; sourceTree = "<group>"; };
+		C7A1F00200000000000000A1 /* AppDelegate+AgentPromptURL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+AgentPromptURL.swift"; sourceTree = "<group>"; };
 		C0DE77060000000000000002 /* AppDelegate+NewWorkspaceMenuRendering.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+NewWorkspaceMenuRendering.swift"; sourceTree = "<group>"; };
 		737100000000000000000004 /* AppDelegate+NonInteractiveWindowClose.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+NonInteractiveWindowClose.swift"; sourceTree = "<group>"; };
 		4EDE10010000000000000002 /* AppDelegate+NotificationDeliverySeams.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+NotificationDeliverySeams.swift"; sourceTree = "<group>"; };
@@ -3789,6 +3794,7 @@
 		C0DE6B420000000000000002 /* TerminalPanelTextBoxState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Panels/TerminalPanelTextBoxState.swift; sourceTree = "<group>"; };
 		811B03E4004A4D1FB6650158 /* TerminalPanelUnavailableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Panels/TerminalPanelUnavailableView.swift; sourceTree = "<group>"; };
 		A5001413 /* TerminalPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Panels/TerminalPanelView.swift; sourceTree = "<group>"; };
+		C7A1F00600000000000000A1 /* TerminalSessionLinksBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Panels/TerminalSessionLinksBar.swift; sourceTree = "<group>"; };
 		B88351000000000000000002 /* TerminalPasteboardReadRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalPasteboardReadRequest.swift; sourceTree = "<group>"; };
 		B8835B000000000000000004 /* TerminalPasteFailureNotice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalPasteFailureNotice.swift; sourceTree = "<group>"; };
 		B8835B000000000000000006 /* TerminalPasteFailureNoticePresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalPasteFailureNoticePresenter.swift; sourceTree = "<group>"; };
@@ -5498,6 +5504,8 @@
 				A5FB1208 /* AppDelegate+WorkspaceActionSave.swift */,
 				A5FB1314 /* WorkspaceActionSaveDialogAccessory.swift */,
 				A5FB1302 /* AppDelegate+NewWorkspaceContextMenu.swift */,
+				C7A1F00400000000000000A1 /* WorkspaceFolderPresetRow.swift */,
+				C7A1F00200000000000000A1 /* AppDelegate+AgentPromptURL.swift */,
 				C0DE77060000000000000002 /* AppDelegate+NewWorkspaceMenuRendering.swift */,
 				737100000000000000000004 /* AppDelegate+NonInteractiveWindowClose.swift */,
 				C0DE77060000000000000004 /* NewWorkspaceMenuModel.swift */,
@@ -5590,6 +5598,7 @@
 				C0DE5A410000000000000002 /* TerminalPanelShellActivityModel.swift */,
 				C0DE6B420000000000000002 /* TerminalPanelTextBoxState.swift */,
 				A5001413 /* TerminalPanelView.swift */,
+				C7A1F00600000000000000A1 /* TerminalSessionLinksBar.swift */,
 				D4983F8022A862E60F27778D /* TerminalPanel+ShellReadiness.swift */,
 				BE3792D6AED275EA7DB3EB0B /* TerminalPanel+PasteLastScreenshot.swift */,
 				8997D00C8997D00C8997D00C /* AgentHibernationPlaceholderMode.swift */,
@@ -6865,6 +6874,8 @@
 				FF940D2B29BB4FF1B39E459C /* AppDelegate+MoveTerminalToWorkspaceGroup.swift in Sources */,
 				D77690000000000000000001 /* AppDelegate+MultiWindowNotificationUITestFixture.swift in Sources */,
 				A5FB1301 /* AppDelegate+NewWorkspaceContextMenu.swift in Sources */,
+				C7A1F00300000000000000A1 /* WorkspaceFolderPresetRow.swift in Sources */,
+				C7A1F00100000000000000A1 /* AppDelegate+AgentPromptURL.swift in Sources */,
 				C0DE77060000000000000001 /* AppDelegate+NewWorkspaceMenuRendering.swift in Sources */,
 				737100000000000000000003 /* AppDelegate+NonInteractiveWindowClose.swift in Sources */,
 				4EDE10010000000000000001 /* AppDelegate+NotificationDeliverySeams.swift in Sources */,
@@ -8116,6 +8127,7 @@
 				C0DE6B420000000000000001 /* TerminalPanelTextBoxState.swift in Sources */,
 				6819AF60AEA6455DB57CC7FE /* TerminalPanelUnavailableView.swift in Sources */,
 				A5001403 /* TerminalPanelView.swift in Sources */,
+				C7A1F00500000000000000A1 /* TerminalSessionLinksBar.swift in Sources */,
 				B88351000000000000000001 /* TerminalPasteboardReadRequest.swift in Sources */,
 				B8835B000000000000000003 /* TerminalPasteFailureNotice.swift in Sources */,
 				B8835B000000000000000005 /* TerminalPasteFailureNoticePresenter.swift in Sources */,
@@ -8825,13 +8837,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CMUX_AUTH_CALLBACK_SCHEME = cmux;
+				CMUX_AUTH_CALLBACK_SCHEME = ckmux;
 				CMUX_IROH_RELAY_POLICY_KEY_ID = "cmux-production-relay-policy-2026-07";
 				CMUX_IROH_RELAY_POLICY_NEXT_KEY_ID = "cmux-production-relay-policy-2026-08";
 				CMUX_IROH_RELAY_POLICY_NEXT_PUBLIC_KEY_BASE64 = "k+FND+WlELCkHs9QnWg1TfTuHXBwyv2907umX+mUOOU=";
 				CMUX_IROH_RELAY_POLICY_PUBLIC_KEY_BASE64 = "qoBinRqX4TI1Ro6xAuOQxKUkeZT3pkFJuERP/+R+9aw=";
 				CMUX_SIDEBAR_EXTENSION_POINT_ID = com.cmuxterm.app.cmux.sidebar;
-				CODE_SIGN_ENTITLEMENTS = Resources/cmux.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 111;
@@ -8858,8 +8870,8 @@
 					"-framework",
 					Carbon,
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.cmuxterm.app;
-				PRODUCT_NAME = cmux;
+				PRODUCT_BUNDLE_IDENTIFIER = com.chka.ckmux;
+				PRODUCT_NAME = ckmux;
 				SPARKLE_PUBLIC_KEY = "avjcgKibf1FTvhIjLBxhd+0HSpsXU4D0IGlVk8cgqRc=";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "cmux-Bridging-Header.h";
@@ -8946,7 +8958,7 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 0.65.2;
-				PRODUCT_BUNDLE_IDENTIFIER = com.cmuxterm.app.docktileplugin;
+				PRODUCT_BUNDLE_IDENTIFIER = com.chka.ckmux.docktileplugin;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;

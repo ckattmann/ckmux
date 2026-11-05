@@ -17,7 +17,7 @@ public struct SidebarCatalogSection: SettingCatalogSection {
 
     public let hideAllDetails = DefaultsKey<Bool>(
         id: "sidebar.hideAllDetails",
-        defaultValue: false,
+        defaultValue: true,
         userDefaultsKey: "sidebarHideAllDetails"
     )
 

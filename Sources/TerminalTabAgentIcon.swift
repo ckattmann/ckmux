@@ -19,8 +19,9 @@ extension Workspace {
     /// Returns the current provider mark for one terminal panel, if known.
     func terminalTabAgentIconAsset(forPanelId panelId: UUID) -> String? {
         let resolver = TerminalTabAgentIconResolver()
-        let statusKeys = agentPIDKeysByPanelId[panelId, default: []]
-            .map(agentStatusKey(forAgentPIDKey:))
+        let statusKeys = Set(agentPIDKeysByPanelId[panelId, default: []].map(agentStatusKey(forAgentPIDKey:)))
+            .union(agentStatusEntriesByPanelId[panelId].map { Array($0.keys) } ?? [])
+            .union(agentLifecycleStatesByPanelId[panelId].map { Array($0.keys) } ?? [])
             .sorted()
         if let asset = statusKeys.compactMap(resolver.assetName(forStatusKey:)).first {
             return asset
@@ -41,13 +42,59 @@ extension Workspace {
         }
     }
 
+    func terminalTabStatus(forPanelId panelId: UUID) -> TabStatus? {
+        let hasStatusEntry = agentStatusEntriesByPanelId[panelId]?.isEmpty == false
+        let lifecycle = AgentHibernationLifecycleState.aggregate(
+            statusKeyedStates: agentLifecycleStatesByPanelId[panelId] ?? [:],
+            fallback: nil
+        )
+        switch lifecycle {
+        case .running, .backgroundWorkPending:
+            return .running
+        case .needsInput:
+            return .needsInput
+        case .idle:
+            return .idle
+        case .unknown:
+            if hasStatusEntry { return .idle }
+        }
+        return panelShellActivityStates[panelId] == .commandRunning ? .running : nil
+    }
+
+    func syncTerminalTabStatus(forPanelId panelId: UUID) {
+        guard panels[panelId] is TerminalPanel, let tabID = surfaceIdFromPanelId(panelId) else { return }
+        bonsplitController.updateTab(tabID, status: .some(terminalTabStatus(forPanelId: panelId)))
+    }
+
     /// Reconciles a terminal tab's provider mark after agent lifecycle state changes.
     func syncTerminalTabAgentIconAsset(forPanelId panelId: UUID) {
+        syncTerminalTabStatus(forPanelId: panelId)
         guard panels[panelId] is TerminalPanel,
               let tabID = surfaceIdFromPanelId(panelId),
               let tab = bonsplitController.tab(tabID) else { return }
         let asset = terminalTabAgentIconAsset(forPanelId: panelId)
+#if DEBUG
+        dlog("tab.agentIcon panel=\(panelId.uuidString.prefix(5)) pid=\(agentPIDKeysByPanelId[panelId, default: []].sorted()) entries=\(agentStatusEntriesByPanelId[panelId].map { Array($0.keys) } ?? []) lifecycle=\(agentLifecycleStatesByPanelId[panelId].map { Array($0.keys) } ?? []) current=\(tab.iconAsset ?? "nil") asset=\(asset ?? "nil")")
+#endif
         guard tab.iconAsset != asset else { return }
         bonsplitController.updateTab(tabID, iconAsset: .some(asset))
     }
+}
+
+extension TabStatus {
+    static let running = TabStatus(
+        text: String(localized: "tab.status.running", defaultValue: "Running"),
+        symbolName: "bolt.circle.fill",
+        colorHex: "#0A84FF"
+    )
+    static let needsInput = TabStatus(
+        text: String(localized: "tab.status.needsInput", defaultValue: "Needs input"),
+        symbolName: "exclamationmark.circle.fill",
+        colorHex: "#FF9F0A"
+    )
+    static let idle = TabStatus(
+        text: String(localized: "tab.status.idle", defaultValue: "Idle"),
+        symbolName: "checkmark.circle.fill",
+        colorHex: "#30D158"
+    )
 }

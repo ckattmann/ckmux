@@ -204,3 +204,59 @@ extension CMUXCLI {
         ))
     }
 }
+
+extension CMUXCLI {
+    /// `prompt [--agent claude|codex] [--cwd <dir>] [--name <title>] [--window <id>] [--no-focus] (<text>… | --prompt-file <path|->)`
+    func runPromptCommand(
+        commandArgs: [String],
+        client: SocketClient,
+        jsonOutput: Bool,
+        idFormat: CLIIDFormat,
+        windowOverride: String?
+    ) throws {
+        let separatorIndex = commandArgs.firstIndex(of: "--")
+        let optionArgs = separatorIndex.map { Array(commandArgs[..<$0]) } ?? commandArgs
+        let trailingText = separatorIndex.map { Array(commandArgs[commandArgs.index(after: $0)...]) } ?? []
+        let (agentOpt, rem0) = parseOption(optionArgs, name: "--agent")
+        let (cwdOpt, rem1) = parseOption(rem0, name: "--cwd")
+        let (nameOpt, rem2) = parseOption(rem1, name: "--name")
+        let (promptFileOpt, rem3) = parseOption(rem2, name: "--prompt-file")
+        let (windowOpt, rem4) = parseOption(rem3, name: "--window")
+        let noFocus = rem4.contains("--no-focus")
+        let positionals = rem4.filter { $0 != "--no-focus" }
+        if let unknown = positionals.first(where: { $0.hasPrefix("--") }) {
+            throw CLIError(message: "prompt: unknown flag '\(unknown)'. Known flags: --agent claude|codex, --cwd <dir>, --name <title>, --prompt-file <path|->, --window <id|ref|index>, --no-focus")
+        }
+
+        let agent = (agentOpt ?? "claude").lowercased()
+        guard ["claude", "codex"].contains(agent) else {
+            throw CLIError(message: "prompt: --agent must be claude or codex")
+        }
+        let prompt: String
+        if let promptFileOpt {
+            let data = promptFileOpt == "-"
+                ? FileHandle.standardInput.readDataToEndOfFile()
+                : try Data(contentsOf: URL(fileURLWithPath: resolvePath(promptFileOpt)))
+            prompt = String(decoding: data, as: UTF8.self)
+        } else {
+            prompt = (positionals + trailingText).joined(separator: " ")
+        }
+        guard !prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            throw CLIError(message: "prompt: missing prompt text")
+        }
+
+        var params: [String: Any] = [:]
+        try applyWindowOrCallerContext(to: &params, client: client, windowRaw: windowOpt ?? windowOverride)
+        if let cwdOpt { params["cwd"] = resolvePath(cwdOpt) }
+        let firstLine = prompt.split(whereSeparator: \.isNewline).first.map(String.init) ?? prompt
+        params["title"] = nameOpt ?? (firstLine.count > 40 ? String(firstLine.prefix(40)) + "…" : firstLine)
+        params["initial_input"] = "\(agent) '\(prompt.replacingOccurrences(of: "'", with: "'\\''"))'\r"
+        params["focus"] = !noFocus
+        let response = try client.sendV2(method: "workspace.create", params: params)
+        if jsonOutput {
+            print(jsonString(formatIDs(response, mode: idFormat)))
+        } else {
+            print("OK \((response["workspace_ref"] as? String) ?? (response["workspace_id"] as? String) ?? "")")
+        }
+    }
+}

@@ -518,6 +518,12 @@ public struct AgentNotificationReconciler: Sendable {
                 session.rootStopped = false
                 session.pendingCompletion = nil
                 if session.completionIdentity != nil { session.reopenedSinceCompletion = true }
+                if draft.nativeEvent?.caseInsensitiveCompare("PreToolUse") == .orderedSame,
+                   event.sequence > session.attentionEpoch {
+                    for identity in Array(session.attentionIdentities) {
+                        if let key = session.retireAttention(identity) { invalidated.append(key) }
+                    }
+                }
             }
             if let phase = draft.declaredPhase {
                 session.phase = phase == .running && !session.attentionIdentities.isEmpty ? .needsInput : phase

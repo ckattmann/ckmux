@@ -536,7 +536,7 @@ enum AgentConversationForkDestination: String, CaseIterable, Identifiable, Senda
 
     var id: String { rawValue }
 
-    static let defaultDestination: AgentConversationForkDestination = .right
+    static let defaultDestination: AgentConversationForkDestination = .newTab
 
     init(tabContextAction: TabContextAction) {
         switch tabContextAction {
@@ -664,7 +664,8 @@ enum AgentConversationForkDefaultSettings {
 
     static func current(defaults: UserDefaults = .standard) -> AgentConversationForkDestination {
         guard let raw = defaults.string(forKey: key),
-              let destination = AgentConversationForkDestination(rawValue: raw) else {
+              let destination = AgentConversationForkDestination(rawValue: raw),
+              [.newTab, .newWorkspace].contains(destination) else {
             return defaultDestination
         }
         return destination

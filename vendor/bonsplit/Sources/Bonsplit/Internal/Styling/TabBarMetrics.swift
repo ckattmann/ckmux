@@ -19,6 +19,15 @@ enum TabBarMetrics {
     static let activeIndicatorTrailingInset: CGFloat = 1
     static let selectedTabLeftSeparatorBottomInset: CGFloat = 1
 
+    // MARK: - Wrapped Pill Tabs
+
+    static let pillHeight: CGFloat = 24
+    static let pillSpacing: CGFloat = 4
+    static let pillHorizontalPadding: CGFloat = 10
+    static let pillRowSpacing: CGFloat = 4
+    static let pillBarHorizontalPadding: CGFloat = 6
+    static let pillBarVerticalPadding: CGFloat = 4
+
     // MARK: - Tab Content
 
     static let iconSize: CGFloat = 14

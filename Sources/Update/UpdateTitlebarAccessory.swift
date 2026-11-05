@@ -590,8 +590,6 @@ func titlebarShortcutHintVerticalOffset(for config: TitlebarControlsStyleConfig)
 
 enum TitlebarShortcutHintActionSlot: Int, CaseIterable {
     case toggleSidebar
-    case showNotifications
-    case newTab
     case focusHistoryBack
     case focusHistoryForward
 
@@ -599,10 +597,6 @@ enum TitlebarShortcutHintActionSlot: Int, CaseIterable {
         switch self {
         case .toggleSidebar:
             return .toggleSidebar
-        case .showNotifications:
-            return .showNotifications
-        case .newTab:
-            return .newTab
         case .focusHistoryBack:
             return .focusHistoryBack
         case .focusHistoryForward:
@@ -640,10 +634,6 @@ enum TitlebarControlsLayoutMetrics {
         let actionSlot: MinimalModeSidebarControlActionSlot = switch slot {
         case .toggleSidebar:
             .toggleSidebar
-        case .showNotifications:
-            .showNotifications
-        case .newTab:
-            .newTab
         case .focusHistoryBack:
             .focusHistoryBack
         case .focusHistoryForward:
@@ -1155,33 +1145,6 @@ struct TitlebarControlsView: View {
             TitlebarControlButton(
                 config: config,
                 foregroundColor: foregroundColor,
-                accessibilityIdentifier: "titlebarControl.showNotifications",
-                accessibilityLabel: String(localized: "titlebar.notifications.accessibilityLabel", defaultValue: "Notifications"),
-                action: {
-                #if DEBUG
-                cmuxDebugLog("titlebar.notifications")
-                #endif
-                onToggleNotifications()
-            }) {
-                ZStack(alignment: .topTrailing) {
-                    iconLabel(
-                        systemName: "bell",
-                        config: config,
-                        foregroundColor: foregroundColor,
-                        iconGeometryKeyPrefix: "titlebarControl_showNotificationsIcon"
-                    )
-
-                    TitlebarNotificationBadge(unreadModel: unreadModel, config: config)
-                }
-                .frame(width: config.buttonSize, height: config.buttonSize)
-            }
-            .background(NotificationsAnchorView { viewModel.notificationsAnchorView = $0 })
-            .safeHelp(KeyboardShortcutSettings.Action.showNotifications.tooltip(String(localized: "titlebar.notifications.tooltip", defaultValue: "Show notifications")))
-
-
-            TitlebarControlButton(
-                config: config,
-                foregroundColor: foregroundColor,
                 accessibilityIdentifier: "titlebarControl.focusHistoryBack",
                 accessibilityLabel: String(localized: "menu.history.focusBack", defaultValue: "Focus Back"),
                 action: onFocusHistoryBack,
@@ -1599,15 +1562,6 @@ struct HiddenTitlebarSidebarControlsView: View {
                 switch slot {
                 case .toggleSidebar:
                     onToggleSidebar()
-                case .showNotifications:
-                    onToggleNotifications(anchorView)
-                case .newTab:
-                    onNewTab()
-                case .newWorkspaceMenu:
-                    _ = AppDelegate.shared?.showNewWorkspaceContextMenu(
-                        anchorView: anchorView,
-                        debugSource: "titlebar.minimalSidebar.newWorkspaceMenu"
-                    )
                 case .focusHistoryBack:
                     let availability = focusHistoryNavigationAvailability(
                         preferredWindow: hostWindowForFocusHistoryNavigation

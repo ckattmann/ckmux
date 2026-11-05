@@ -56,7 +56,7 @@ public enum TabContextAction: String, CaseIterable, Sendable {
     /// Asks the host to disconnect every other client of the terminal.
     case disconnectOtherClients
 
-    public static let defaultForkConversationDestination: TabContextAction = .forkConversationRight
+    public static let defaultForkConversationDestination: TabContextAction = .forkConversationNewTab
 
     /// The context action that selects a sizing mode.
     ///

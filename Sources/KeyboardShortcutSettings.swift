@@ -105,7 +105,7 @@ enum KeyboardShortcutSettings {
         case goToWorkspace
         case commandPalette
         case agentInbox
-        case openChief
+        case showAllTerminals
         case commandPaletteNext
         case commandPalettePrevious
         case sendFeedback
@@ -262,7 +262,7 @@ enum KeyboardShortcutSettings {
             case .goToWorkspace: return String(localized: "menu.file.goToWorkspace", defaultValue: "Go to Workspace…")
             case .commandPalette: return String(localized: "menu.file.commandPalette", defaultValue: "Command Palette…")
             case .agentInbox: return String(localized: "shortcut.agentInbox.label", defaultValue: "Show Agent Inbox")
-            case .openChief: return String(localized: "shortcut.openChief.label", defaultValue: "Open Chief")
+            case .showAllTerminals: return String(localized: "shortcut.showAllTerminals.label", defaultValue: "Show All Terminals")
             case .commandPaletteNext: return String(localized: "shortcut.commandPaletteNext.label", defaultValue: "Command Palette: Next")
             case .commandPalettePrevious: return String(localized: "shortcut.commandPalettePrevious.label", defaultValue: "Command Palette: Previous")
             case .sendFeedback: return String(localized: "sidebar.help.sendFeedback", defaultValue: "Send Feedback")
@@ -420,6 +420,7 @@ enum KeyboardShortcutSettings {
         var defaultsKey: String { "shortcut.\(rawValue)" }
         /// Factory binding used when the user has not supplied a shortcut override.
         var defaultShortcut: StoredShortcut {
+            if ShortcutAction.removedFeatureActions.map(\.rawValue).contains(rawValue) { return .unbound }
             switch self {
             case .openSettings:
                 return StoredShortcut(key: ",", command: true, shift: false, option: false, control: false)
@@ -481,8 +482,8 @@ enum KeyboardShortcutSettings {
                 return StoredShortcut(key: "p", command: true, shift: true, option: false, control: false)
             case .agentInbox:
                 return StoredShortcut(key: "i", command: true, shift: true, option: false, control: false)
-            case .openChief:
-                return StoredShortcut(key: "c", command: true, shift: true, option: false, control: false)
+            case .showAllTerminals:
+                return StoredShortcut(key: "a", command: true, shift: true, option: false, control: false)
             case .commandPaletteNext:
                 return StoredShortcut(key: "n", command: false, shift: false, option: false, control: true)
             case .commandPalettePrevious:
@@ -653,7 +654,7 @@ enum KeyboardShortcutSettings {
                 return StoredShortcut(key: "t", command: true, shift: false, option: false, control: false)
             case .toggleTerminalCopyMode:
                 return StoredShortcut(key: "m", command: true, shift: true, option: false, control: false)
-            case .focusTextBoxInput: return StoredShortcut(key: "a", command: true, shift: true, option: false, control: false)
+            case .focusTextBoxInput: return StoredShortcut(key: "c", command: true, shift: true, option: false, control: false)
             case .cycleTextBoxSubmitAction: return StoredShortcut(key: "\t", command: false, shift: true, option: false, control: false)
             case .attachTextBoxFile: return StoredShortcut(key: "a", command: true, shift: true, option: true, control: false)
             case .sendCtrlFToTerminal:

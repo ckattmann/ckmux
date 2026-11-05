@@ -57,6 +57,7 @@ final class TerminalPanel: Panel, ObservableObject {
 
     @Published private(set) var tmuxLayoutReport: TmuxPaneLayoutReport?
     let shellActivity = TerminalPanelShellActivityModel()
+    let createdAt = Date()
     let restoreRecovery = AgentRestoreRecoveryPresentation()
     let textBoxState = TerminalPanelTextBoxState()
     @Published var isTextBoxActive: Bool = false

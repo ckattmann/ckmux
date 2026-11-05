@@ -652,8 +652,8 @@ final class SidebarWorkspaceRowTableCellView: NSTableCellView {
         // Compact status rows are one line; the notification leads the glyph's tooltip instead.
         let effectiveSubtitle = snapshot.compactStatusGlyph != nil
             ? nil
-            : model.latestNotificationText ?? conversationSubtitle
-        let subtitleLineLimit = model.latestNotificationText == nil ? 2 : settings.notificationMessageLineLimit
+            : model.latestNotificationText ?? conversationSubtitle ?? snapshot.terminalActivity.summaryText
+        let subtitleLineLimit = model.latestNotificationText == nil ? 1 : settings.notificationMessageLineLimit
         subtitleView.isHidden = effectiveSubtitle == nil
         if let effectiveSubtitle {
             subtitleView.maximumNumberOfLines = subtitleLineLimit

@@ -100,6 +100,7 @@ struct SidebarWorkspaceSnapshotBuilder {
 
         /// Remote host named after the title when another workspace shares it (beta), else nil.
         var hostTitleSuffix: String? = nil
+        var terminalActivity = TerminalActivityCounts()
 
         /// The title as the row shows it. Renaming and other title affordances keep using `title`.
         var displayTitle: String {
@@ -126,5 +127,20 @@ struct SidebarWorkspaceSnapshotBuilder {
                 : (compactDirectoryCandidates.first ?? branchDirectoryLines.first?.directory)
             return [position, remoteWorkspaceBadgeLabel, cloudDirectory].compactMap { $0 }.joined(separator: ", ")
         }
+    }
+}
+
+struct TerminalActivityCounts: Equatable {
+    var terminalCount = 0
+    var workingCount = 0
+    var idleCount = 0
+
+    var summaryText: String? {
+        guard terminalCount > 0 else { return nil }
+        let format = String(
+            localized: "sidebar.workspace.terminalActivity",
+            defaultValue: "%1$lld tabs · %2$lld working · %3$lld idle"
+        )
+        return String(format: format, Int64(terminalCount), Int64(workingCount), Int64(idleCount))
     }
 }

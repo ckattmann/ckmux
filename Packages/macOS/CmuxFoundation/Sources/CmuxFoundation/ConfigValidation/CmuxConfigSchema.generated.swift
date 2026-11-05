@@ -798,7 +798,7 @@ enum CmuxEmbeddedConfigSchema {
         },
         "minimalMode": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "Hide the workspace title bar and move controls into the sidebar."
         },
         "keepWorkspaceOpenWhenClosingLastSurface": {
@@ -1619,7 +1619,7 @@ enum CmuxEmbeddedConfigSchema {
         },
         "hideAllDetails": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "Hide all per-workspace detail rows."
         },
         "wrapWorkspaceTitles": {
@@ -2598,7 +2598,7 @@ enum CmuxEmbeddedConfigSchema {
               "goToWorkspace",
               "commandPalette",
               "agentInbox",
-              "openChief",
+              "showAllTerminals",
               "commandPaletteNext",
               "commandPalettePrevious",
               "sendFeedback",

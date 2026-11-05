@@ -15,6 +15,12 @@ remnant: the terminal render-grid types (used for agent screen detection) and a 
   (bundle id `com.cmuxterm.app.debug`, socket `/tmp/cmux-debug-ckmux.sock`), separate from the
   installed `/Applications/cmux.app`.
 - `scripts/dev.sh cli <args>` — bundled CLI against the debug socket; `scripts/dev.sh stop` quits it.
+- `scripts/dev.sh release` — Release build, ad-hoc signed, installed as `/Applications/ckmux.app`
+  (bundle id `com.chka.ckmux`, socket `/tmp/cmux-debug-ckmux-app.sock`, URL scheme `ckmux://`) plus a
+  `~/.local/bin/ckmux` CLI shim. Coexists with the real `/Applications/cmux.app`.
+- `ckmux prompt [--agent claude|codex] [--cwd <dir>] [--name <title>] <text>` and
+  `ckmux://prompt?text=…&cwd=…&agent=…&name=…&token=…` start an agent in a new workspace. The URL asks
+  for confirmation unless `token` matches `~/.config/ckmux/prompt-url-token`.
 - Opening `cmux.xcodeproj` in Xcode and pressing Run also works.
 - GhosttyKit is a prebuilt xcframework symlinked at `GhosttyKit.xcframework`;
   `scripts/ensure-ghosttykit.sh` downloads the pinned build (sha in the script) when the link is

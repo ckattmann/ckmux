@@ -108,7 +108,7 @@ public struct BonsplitConfiguration: Sendable {
     // MARK: - Initializer
 
     public init(
-        allowSplits: Bool = true,
+        allowSplits: Bool = false,
         allowCloseTabs: Bool = true,
         allowCloseLastPane: Bool = false,
         allowTabReordering: Bool = true,
@@ -384,10 +384,7 @@ extension BonsplitConfiguration {
 
         /// Built-in split actions shown by default. Hosts can replace this list with custom buttons.
         public static let defaults: [SplitActionButton] = [
-            .newTerminal,
-            .newBrowser,
-            .splitRight,
-            .splitDown
+            .newTerminal
         ]
     }
 
@@ -549,6 +546,9 @@ extension BonsplitConfiguration {
         /// Controls whether tabs use a fixed width and scroll, or stretch to fill the
         /// pane's available tab-bar width. Defaults to ``TabWidthMode/fixed``.
         public var tabWidthMode: TabWidthMode
+
+        /// Lays tabs out as pills that wrap onto extra rows instead of a scrolling strip.
+        public var wrapsTabsIntoRows = false
 
         // MARK: - Split View
 

@@ -40,6 +40,7 @@ final class TerminalNotificationStore: ObservableObject {
         var notificationIDs: Set<UUID> = []
         var unreadCount = 0
         var unreadCountByTabId: [UUID: Int] = [:]
+        var unreadSurfaceIdsByTabId: [UUID: Set<UUID?>] = [:]
         var unreadByTabSurface = Set<TabSurfaceKey>()
         var latestUnreadByTabId: [UUID: TerminalNotification] = [:]
         var latestByTabId: [UUID: TerminalNotification] = [:]
@@ -1018,7 +1019,9 @@ final class TerminalNotificationStore: ObservableObject {
             manualUnreadSurfaceIdsByOwnerId[tabId]?.isEmpty == false ||
             panelDerivedUnreadWorkspaceIds.contains(tabId) ||
             restoredUnreadWorkspaceIds.contains(tabId)
-        return (indexes.unreadCountByTabId[tabId] ?? 0) + (hasWorkspaceUnreadIndicator ? 1 : 0)
+        var unreadSurfaceIds = indexes.unreadSurfaceIdsByTabId[tabId] ?? []
+        unreadSurfaceIds.formUnion((manualUnreadSurfaceIdsByOwnerId[tabId] ?? []).map(Optional.some))
+        return max(unreadSurfaceIds.count, hasWorkspaceUnreadIndicator ? 1 : 0)
     }
 
     func workspaceIsUnread(forTabId tabId: UUID) -> Bool {
@@ -2854,6 +2857,7 @@ final class TerminalNotificationStore: ObservableObject {
             guard !notification.isRead else { continue }
             indexes.unreadCount += 1
             indexes.unreadCountByTabId[notification.tabId, default: 0] += 1
+            indexes.unreadSurfaceIdsByTabId[notification.tabId, default: []].insert(notification.panelId ?? notification.surfaceId)
             indexes.unreadByTabSurface.insert(
                 TabSurfaceKey(tabId: notification.tabId, surfaceId: notification.surfaceId)
             )

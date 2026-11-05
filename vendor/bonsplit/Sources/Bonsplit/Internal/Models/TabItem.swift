@@ -44,6 +44,7 @@ final class TabItem: Identifiable, Hashable, Codable {
     var isPinned: Bool
     var showsRemoteIndicator: Bool
     var presence: TabPresence?
+    var status: TabStatus?
 
     init(
         id: UUID = UUID(),

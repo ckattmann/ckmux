@@ -6953,6 +6953,14 @@ struct CMUXCLI {
                 idFormat: idFormat,
                 windowOverride: windowId
             )
+        case "prompt":
+            try runPromptCommand(
+                commandArgs: commandArgs,
+                client: client,
+                jsonOutput: jsonOutput,
+                idFormat: idFormat,
+                windowOverride: windowId
+            )
         case "new-workspace":
             Self.warnLegacyVerbDeprecated("new-workspace", replacement: "cmux workspace create")
             try runWorkspaceCreateCommand(
@@ -37612,26 +37620,23 @@ export default {
 
         let logo = """
         \(c1)  ::\(reset)
-        \(c2)    ::::\(reset)              \(c1)c\(c2)m\(c3)u\(c7)x\(reset)
+        \(c2)    ::::\(reset)              \(c1)c\(c2)k\(c3)m\(c5)u\(c7)x\(reset)
         \(c3)      ::::::\(reset)
-        \(c4)        ::::::\(reset)        \(tagline)the open source terminal\(reset)
-        \(c5)      ::::::\(reset)          \(tagline)built for coding agents\(reset)
+        \(c4)        ::::::\(reset)        \(tagline)a lean, local cmux\(reset)
+        \(c5)      ::::::\(reset)          \(tagline)for coding agents\(reset)
         \(c6)    ::::\(reset)
         \(c7)  ::\(reset)
         """
 
         let shortcuts = """
           \(bold)Shortcuts\(reset)
-          \(bold)\u{2318}N\(reset)\(subdued)                  New workspace\(reset)
+          \(bold)\u{2318}N\(reset)\(subdued)                  New workspace (name + folder)\(reset)
           \(bold)\u{2318}T\(reset)\(subdued)                  New tab\(reset)
+          \(bold)\u{2318}\u{21E7}A\(reset)\(subdued)                 \(String(localized: "shortcut.showAllTerminals.label", defaultValue: "Show All Terminals"))\(reset)
           \(bold)\u{2318}P\(reset)\(subdued)                  \(String(localized: "menu.file.goToWorkspace", defaultValue: "Go to Workspace…"))\(reset)
-          \(bold)\u{2318}B\(reset)\(subdued)                  \(String(localized: "shortcut.toggleLeftSidebar.label", defaultValue: "Toggle Left Sidebar"))\(reset)
-          \(bold)\u{2318}\u{2325}B\(reset)\(subdued)                 \(String(localized: "shortcut.toggleRightSidebar.label", defaultValue: "Toggle Right Sidebar"))\(reset)
-          \(bold)\u{2318}D\(reset)\(subdued)                  \(String(localized: "shortcut.splitRight.label", defaultValue: "Split Right"))\(reset)
-          \(bold)\u{2318}\u{21E7}D\(reset)\(subdued)                 \(String(localized: "shortcut.splitDown.label", defaultValue: "Split Down"))\(reset)
           \(bold)\u{2318}\u{21E7}P\(reset)\(subdued)                 \(String(localized: "menu.file.commandPalette", defaultValue: "Command Palette…"))\(reset)
           \(bold)\u{2318}\u{21E7}R\(reset)\(subdued)                 \(String(localized: "shortcut.renameWorkspace.label", defaultValue: "Rename Workspace"))\(reset)
-          \(bold)\u{2318}\u{21E7}L\(reset)\(subdued)                 New browser\(reset)
+          \(bold)\u{2318}B\(reset)\(subdued)                  \(String(localized: "shortcut.toggleLeftSidebar.label", defaultValue: "Toggle Left Sidebar"))\(reset)
           \(bold)\u{2318}\u{21E7}U\(reset)\(subdued)                 \(String(localized: "shortcut.jumpToUnread.label", defaultValue: "Jump to Latest Unread"))\(reset)
           \(bold)\u{2325}\u{2318}U\(reset)\(subdued)                 \(String(localized: "shortcut.toggleUnread.label", defaultValue: "Toggle Unread"))\(reset)
         """
@@ -37641,14 +37646,11 @@ export default {
         print()
         print(shortcuts)
         print()
-        print("  \(bold)Docs\(reset)\(subdued)                https://cmux.com/docs\(reset)")
-        print("  \(bold)Discord\(reset)\(subdued)             https://discord.gg/xsgFEVrWCZ\(reset)")
-        print("  \(bold)GitHub\(reset)\(subdued)              https://github.com/manaflow-ai/cmux (please leave a star ⭐)\(reset)")
-        print("  \(bold)Email\(reset)\(subdued)               founders@cmux.com\(reset)")
+        print("  \(bold)Start an agent\(reset)\(subdued)      cmux prompt --cwd <dir> \"<prompt>\"\(reset)")
+        print("  \(bold)From a link\(reset)\(subdued)         ckmux://prompt?text=…&cwd=…\(reset)")
         print()
         print("  \(subdued)Run \(reset)\(bold)cmux --help\(reset)\(subdued) for all commands.\(reset)")
         print("  \(subdued)Run \(reset)\(bold)cmux shortcuts\(reset)\(subdued) to edit shortcuts.\(reset)")
-        print("  \(subdued)Run \(reset)\(bold)cmux feedback\(reset)\(subdued) to report a bug.\(reset)")
         print()
     }
 

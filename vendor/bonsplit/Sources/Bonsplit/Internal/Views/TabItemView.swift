@@ -369,7 +369,7 @@ struct TabItemView: View {
 
     var body: some View {
         tabContent
-        .padding(.horizontal, TabBarMetrics.tabHorizontalPadding)
+        .padding(.horizontal, appearance.wrapsTabsIntoRows ? TabBarMetrics.pillHorizontalPadding : TabBarMetrics.tabHorizontalPadding)
         .frame(
             minWidth: frameMinWidth,
             // In fill mode the tab becomes flexible so the tab strip can distribute
@@ -825,15 +825,27 @@ struct TabItemView: View {
             if tab.isLoading {
                 // Slightly smaller than the icon slot so it reads cleaner at tab scale.
                 TabLoadingSpinner(size: iconSlotSize * 0.86, color: iconTintColor)
+            } else if let status = tab.status, let symbolName = status.symbolName {
+                Image(systemName: symbolName)
+                    .font(.system(size: compactMarkSize, weight: .semibold))
+                    .foregroundStyle(statusTint(status))
+                    .safeHelp(status.text)
             } else if let image = faviconImage {
                 FaviconIconView(image: image)
                     .frame(width: iconSlotSize, height: iconSlotSize, alignment: .center)
                     .clipped()
             } else if let iconAsset = tab.iconAsset {
-                Image(iconAsset, bundle: .main)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: compactMarkSize, height: compactMarkSize, alignment: .center)
+                if let assetImage = NSImage(named: iconAsset) {
+                    Image(nsImage: assetImage)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: compactMarkSize, height: compactMarkSize, alignment: .center)
+                } else {
+                    Image(systemName: "sparkle")
+                        .font(.system(size: compactMarkSize))
+                        .foregroundStyle(iconTint)
+                        .onAppear { NSLog("bonsplit.tab.iconAsset.missing name=%@", iconAsset) }
+                }
             } else if let iconName = tab.icon {
                 if iconName == "globe", !showGlobeFallback {
                     // Avoid a distracting "globe -> favicon" flash: show a neutral placeholder
@@ -1033,7 +1045,7 @@ struct TabItemView: View {
     }
 
     private var tabHeight: CGFloat {
-        max(1, appearance.tabBarHeight)
+        appearance.wrapsTabsIntoRows ? TabBarMetrics.pillHeight : max(1, appearance.tabBarHeight)
     }
 
     @ViewBuilder
@@ -1099,6 +1111,7 @@ struct TabItemView: View {
     private var accessibilityValue: String {
         var parts: [String] = []
         if tab.isLoading { parts.append("Loading") }
+        if let status = tab.status { parts.append(status.text) }
         if tab.isPinned { parts.append("Pinned") }
         if tab.showsNotificationBadge { parts.append("Unread") }
         if tab.isDirty { parts.append("Modified") }
@@ -1112,10 +1125,37 @@ struct TabItemView: View {
         return parts.joined(separator: ", ")
     }
 
+    private func statusTint(_ status: TabStatus) -> Color {
+        status.colorHex.flatMap(BonsplitContrastPalette.RGB.init(hex:)).map { Color(red: $0.red, green: $0.green, blue: $0.blue) }
+            ?? TabBarColors.inactiveText(for: appearance)
+    }
+
     // MARK: - Tab Background
 
     @ViewBuilder
     private var tabBackground: some View {
+        if appearance.wrapsTabsIntoRows {
+            pillBackground
+        } else {
+            stripBackground
+        }
+    }
+
+    private var pillBackground: some View {
+        let shape = Capsule(style: .continuous)
+        let contrast: Color = TabBarColors.usesDarkChrome(for: appearance).map { $0 ? .white : .black } ?? .primary
+        return shape
+            .fill(isSelected
+                ? TabBarColors.activeTabBackground(for: appearance)
+                : TabBarColors.hoveredTabBackground(for: appearance).opacity(isHovered ? 1 : 0.45))
+            .overlay(shape.fill(contrast.opacity(isSelected ? 0.12 : 0)))
+            .overlay(shape.strokeBorder(
+                isSelected ? contrast.opacity(0.4) : TabBarColors.separator(for: appearance),
+                lineWidth: isSelected ? 1 : 0.5
+            ))
+    }
+
+    private var stripBackground: some View {
         ZStack(alignment: .top) {
             if isSelected {
                 Rectangle()
@@ -1520,25 +1560,6 @@ enum TabContextMenuBuilder {
 
         menu.addItem(moveSubmenuItem(snapshot: snapshot, target: target))
 
-        if state.isTerminal {
-            addAction(
-                title: localized("command.moveTabToLeftPane.title", defaultValue: "Move to Left Pane"),
-                action: .moveToLeftPane,
-                enabled: state.canMoveToLeftPane,
-                state: state,
-                target: target,
-                to: menu
-            )
-            addAction(
-                title: localized("command.moveTabToRightPane.title", defaultValue: "Move to Right Pane"),
-                action: .moveToRightPane,
-                enabled: state.canMoveToRightPane,
-                state: state,
-                target: target,
-                to: menu
-            )
-        }
-
         if forkConversationAvailability != .hidden {
             let separator = NSMenuItem.separator()
             separator.identifier = forkConversationSeparatorIdentifier
@@ -1570,75 +1591,7 @@ enum TabContextMenuBuilder {
             target: target,
             to: menu
         )
-        addAction(
-            title: localized("tabContext.newBrowserTabToRight", defaultValue: "New Browser Tab to Right"),
-            action: .newBrowserToRight,
-            state: state,
-            target: target,
-            to: menu
-        )
-
-        if state.isBrowser {
-            menu.addItem(.separator())
-            addAction(
-                title: state.isAudioMuted
-                    ? localized("tabContext.unmuteTab", defaultValue: "Unmute Tab")
-                    : localized("tabContext.muteTab", defaultValue: "Mute Tab"),
-                action: .toggleAudioMute,
-                state: state,
-                target: target,
-                to: menu
-            )
-            addAction(
-                title: localized("tabContext.reloadTab", defaultValue: "Reload Tab"),
-                action: .reload,
-                state: state,
-                target: target,
-                to: menu
-            )
-            addAction(
-                title: localized("tabContext.duplicateTab", defaultValue: "Duplicate Tab"),
-                action: .duplicate,
-                state: state,
-                target: target,
-                to: menu
-            )
-        }
-
-        if state.canDisconnectRemote {
-            menu.addItem(.separator())
-            addAction(
-                title: localized("tabContext.disconnectRemote", defaultValue: "Disconnect SSH"),
-                action: .disconnectRemote,
-                state: state,
-                target: target,
-                to: menu
-            )
-        }
-
         menu.addItem(.separator())
-
-        if state.hasSplits {
-            addAction(
-                title: state.isZoomed
-                    ? localized("tabContext.exitZoom", defaultValue: "Exit Zoom")
-                    : localized("tabContext.zoomPane", defaultValue: "Zoom Pane"),
-                action: .toggleZoom,
-                state: state,
-                target: target,
-                to: menu
-            )
-        }
-
-        addAction(
-            title: state.isFullWidthTabMode
-                ? localized("tabContext.exitFullWidthTab", defaultValue: "Exit Full Width Tab")
-                : localized("tabContext.enterFullWidthTab", defaultValue: "Full Width Tab"),
-            action: .toggleFullWidthTab,
-            state: state,
-            target: target,
-            to: menu
-        )
 
         addAction(
             title: state.isPinned
@@ -1817,43 +1770,6 @@ enum TabContextMenuBuilder {
             ? state.forkConversationDefaultAction
             : .defaultForkConversationDestination
 
-        addAction(
-            title: localized("tabContext.forkConversation.right", defaultValue: "Right Split"),
-            action: .forkConversationRight,
-            enabled: enabled,
-            state: state,
-            target: target,
-            to: submenu,
-            stateValue: defaultAction == .forkConversationRight ? .on : .off
-        )
-        addAction(
-            title: localized("tabContext.forkConversation.left", defaultValue: "Left Split"),
-            action: .forkConversationLeft,
-            enabled: enabled,
-            state: state,
-            target: target,
-            to: submenu,
-            stateValue: defaultAction == .forkConversationLeft ? .on : .off
-        )
-        addAction(
-            title: localized("tabContext.forkConversation.top", defaultValue: "Top Split"),
-            action: .forkConversationTop,
-            enabled: enabled,
-            state: state,
-            target: target,
-            to: submenu,
-            stateValue: defaultAction == .forkConversationTop ? .on : .off
-        )
-        addAction(
-            title: localized("tabContext.forkConversation.bottom", defaultValue: "Bottom Split"),
-            action: .forkConversationBottom,
-            enabled: enabled,
-            state: state,
-            target: target,
-            to: submenu,
-            stateValue: defaultAction == .forkConversationBottom ? .on : .off
-        )
-        submenu.addItem(.separator())
         addAction(
             title: localized("tabContext.forkConversation.newTab", defaultValue: "New Tab"),
             action: .forkConversationNewTab,

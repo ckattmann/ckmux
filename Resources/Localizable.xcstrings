@@ -35098,28 +35098,6 @@
         }
       }
     },
-    "command.openChief.subtitle": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Chief"
-          }
-        }
-      }
-    },
-    "command.openChief.title": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Open Chief"
-          }
-        }
-      }
-    },
     "command.openCloudPane.title": {
       "extractionState": "manual",
       "localizations": {
@@ -78667,17 +78645,6 @@
         }
       }
     },
-    "shortcut.openChief.label": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Open Chief"
-          }
-        }
-      }
-    },
     "shortcut.openDiffViewer.label": {
       "extractionState": "manual",
       "localizations": {
@@ -79158,6 +79125,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Workspace Color: Teal"
+          }
+        }
+      }
+    },
+    "shortcut.showAllTerminals.label": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show All Terminals"
           }
         }
       }
@@ -82932,6 +82910,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Rename workspace"
+          }
+        }
+      }
+    },
+    "sidebar.workspace.terminalActivity": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld tabs · %2$lld working · %3$lld idle"
           }
         }
       }
@@ -92528,6 +92517,39 @@
         }
       }
     },
+    "tab.status.idle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Idle"
+          }
+        }
+      }
+    },
+    "tab.status.needsInput": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Needs input"
+          }
+        }
+      }
+    },
+    "tab.status.running": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Running"
+          }
+        }
+      }
+    },
     "tab.untitled": {
       "extractionState": "manual",
       "localizations": {
@@ -93977,7 +93999,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Idle at prompt"
+            "value": "Idle"
           }
         }
       }
@@ -93988,7 +94010,29 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Command running"
+            "value": "Running"
+          }
+        }
+      }
+    },
+    "terminalOverview.arrangement.byWorkspace": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "By Workspace"
+          }
+        }
+      }
+    },
+    "terminalOverview.arrangement.newestFirst": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Newest First"
           }
         }
       }
@@ -94011,28 +94055,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Filter terminals"
-          }
-        }
-      }
-    },
-    "terminalOverview.focused": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Focused"
-          }
-        }
-      }
-    },
-    "terminalOverview.git.dirty": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Uncommitted changes"
           }
         }
       }
@@ -94081,50 +94103,6 @@
         }
       }
     },
-    "terminalOverview.stat.agents": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Agents"
-          }
-        }
-      }
-    },
-    "terminalOverview.stat.running": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Running"
-          }
-        }
-      }
-    },
-    "terminalOverview.stat.terminals": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Terminals"
-          }
-        }
-      }
-    },
-    "terminalOverview.stat.workspaces": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Workspaces"
-          }
-        }
-      }
-    },
     "terminalOverview.title": {
       "extractionState": "manual",
       "localizations": {
@@ -94132,17 +94110,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Terminals"
-          }
-        }
-      }
-    },
-    "terminalOverview.ungrouped": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No Group"
           }
         }
       }

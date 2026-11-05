@@ -78,7 +78,7 @@ public struct TerminalLinkContextMenuPolicy: Sendable {
     ///   - pathResolver: The file-existence seam, injectable for tests.
     public init(
         router: TerminalLinkRouter,
-        embeddedBrowserIsAvailable: Bool = true,
+        embeddedBrowserIsAvailable: Bool = false,
         pathResolver: TerminalPathResolver = TerminalPathResolver()
     ) {
         self.router = router

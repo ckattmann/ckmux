@@ -1850,6 +1850,13 @@ struct ContentView: View {
             .opacity(sidebarSelectionState.selection == .tabs ? 1 : 0)
             .allowsHitTesting(sidebarSelectionState.selection == .tabs)
             .accessibilityHidden(sidebarSelectionState.selection != .tabs)
+            if sidebarSelectionState.selection == .home {
+                TerminalOverviewView(tabManager: tabManager) { row in
+                    sidebarSelectionState.selection = .tabs
+                    tabManager.focusTab(row.workspaceId, surfaceId: row.id)
+                }
+                .zIndex(3)
+            }
         }
         .modifier(WorkspacePresentationModeContentTopPaddingModifier(
             isFullScreen: isFullScreen,
@@ -4048,6 +4055,21 @@ struct ContentView: View {
             .padding(.horizontal, 9)
             .padding(.vertical, 7)
 
+            if case .workspace(let workspaceId) = target.kind,
+               let workspace = tabManager.tabs.first(where: { $0.id == workspaceId }),
+               workspace.offersInitialFolderChoice {
+                Divider()
+                WorkspaceFolderPresetRow(
+                    presets: WorkspaceRecentFolders.presets(
+                        openDirectories: tabManager.tabs.filter { $0.id != workspaceId }.map(\.currentDirectory)
+                    ),
+                    onChoose: { path in moveNewWorkspace(workspace, toFolder: path) }
+                )
+                .padding(.horizontal, 9)
+                .padding(.vertical, 6)
+                .onDisappear { workspace.offersInitialFolderChoice = false }
+            }
+
             Divider()
 
             Text(renameInputHintText(target: target))
@@ -4072,6 +4094,13 @@ struct ContentView: View {
         .onAppear {
             resetCommandPaletteRenameFocus()
         }
+    }
+
+    private func moveNewWorkspace(_ workspace: Workspace, toFolder path: String) {
+        guard let panel = workspace.focusedTerminalPanel else { return }
+        let quoted = "'" + path.replacingOccurrences(of: "'", with: "'\\''") + "'"
+        workspace.sendInputWhenReady(" cd -- \(quoted) && clear\r", to: panel)
+        workspace.updatePanelDirectory(panelId: panel.id, directory: path)
     }
 
     private func commandPaletteRenameConfirmView(
@@ -6953,14 +6982,6 @@ struct ContentView: View {
     }
 
     private func refreshCachedDefaultTerminalStatus(refreshSearchCorpusIfPresented: Bool = true) {
-        return
-
-        cachedCommandPaletteFingerprint = nil
-        if refreshSearchCorpusIfPresented, isCommandPalettePresented {
-            scheduleCommandPaletteResultsRefresh(forceSearchCorpusRefresh: true, preservePendingActivation: true)
-            syncCommandPaletteOverlayCommandListState()
-            syncCommandPaletteDebugStateForObservedWindow()
-        }
     }
 
     private func commandPaletteCommandsContext(
@@ -6991,6 +7012,7 @@ struct ContentView: View {
         var nextRank = 0
 
         for contribution in contributions {
+            guard !Self.removedFeaturePaletteCommandIds.contains(contribution.commandId) else { continue }
             guard cloudCapabilityPolicy.allows(
                 commandId: contribution.commandId,
                 context: context
@@ -7002,7 +7024,10 @@ struct ContentView: View {
             }
             guard contribution.when(context), contribution.enablement(context) else { continue }
             guard let action = handlerRegistry.handler(for: contribution.commandId) else {
-                assertionFailure("No command palette handler registered for \(contribution.commandId)")
+                NSLog("commandPalette.missingHandler id=%@", contribution.commandId)
+#if DEBUG
+                dlog("commandPalette.missingHandler id=\(contribution.commandId)")
+#endif
                 continue
             }
             commands.append(
@@ -7253,6 +7278,56 @@ struct ContentView: View {
 
     /// Builds command-palette contributions from synchronous context and cached async availability.
     /// Builds the complete Cmd-Shift-P contribution list before filtering.
+    private static let removedFeaturePaletteCommandIds: Set<String> = [
+        "palette.browserBack",
+        "palette.browserConsole",
+        "palette.browserFocusAddressBar",
+        "palette.browserForward",
+        "palette.browserHardReload",
+        "palette.browserReactGrab",
+        "palette.browserReload",
+        "palette.browserSplitDown",
+        "palette.browserSplitRight",
+        "palette.browserToggleDevTools",
+        "palette.browserZoomIn",
+        "palette.browserZoomOut",
+        "palette.browserZoomReset",
+        "palette.copyPaneID",
+        "palette.copyPaneLink",
+        "palette.equalizeSplits",
+        "palette.focusNextPane",
+        "palette.focusPaneDown",
+        "palette.focusPaneLeft",
+        "palette.focusPaneRight",
+        "palette.focusPaneUp",
+        "palette.focusPreviousPane",
+        "palette.moveSurfaceToNextPane",
+        "palette.moveSurfaceToPaneDown",
+        "palette.moveSurfaceToPaneLeft",
+        "palette.moveSurfaceToPaneRight",
+        "palette.moveSurfaceToPaneUp",
+        "palette.moveSurfaceToPreviousPane",
+        "palette.newBrowserTab",
+        "palette.newBrowserWorkspace",
+        "palette.newPaneAutoLayout",
+        "palette.newSimulatorPane",
+        "palette.openCloudPane",
+        "palette.openFilesPane",
+        "palette.openFindPane",
+        "palette.openVaultPane",
+        "palette.openWorkspaceTodoPane",
+        "palette.reopenClosedBrowserTab",
+        "palette.resizePaneDown",
+        "palette.resizePaneLeft",
+        "palette.resizePaneRight",
+        "palette.resizePaneUp",
+        "palette.terminalSplitBrowserDown",
+        "palette.terminalSplitBrowserRight",
+        "palette.terminalSplitDown",
+        "palette.terminalSplitRight",
+        "palette.toggleSplitZoom"
+    ]
+
     private func commandPaletteCommandContributions() -> [CommandPaletteCommandContribution] {
         func constant(_ value: String) -> (CommandPaletteContextSnapshot) -> String {
             { _ in value }
@@ -8737,6 +8812,7 @@ struct ContentView: View {
         registerIdentifierCopyCommandHandlers(
             &registry
         )
+        registerShortcutParityCommandHandlers(&registry, preferredWindow: { observedWindow })
 
         registry.register(commandId: "palette.renameTab") {
             beginRenameTabFlow()
@@ -11137,6 +11213,13 @@ struct VerticalTabsSidebar: View, Equatable {
         }
         .accessibilityIdentifier("Sidebar")
         .ignoresSafeArea()
+        .overlay(alignment: .top) {
+            if isPresented {
+                SidebarTerminalOverviewRow()
+                .padding(.top, MinimalModeChromeMetrics.titlebarHeight)
+                .ignoresSafeArea()
+            }
+        }
         .overlay(alignment: .trailing) {
             WindowChromeBorder(
                 orientation: .vertical,
@@ -14967,12 +15050,6 @@ private struct SidebarHelpMenuButton: View {
                 title: String(localized: "settings.section.keyboardShortcuts", defaultValue: "Keyboard Shortcuts"),
                 action: .keyboardShortcuts,
                 accessibilityIdentifier: "SidebarHelpMenuOptionKeyboardShortcuts",
-                isExternalLink: false
-            )
-            helpOptionButton(
-                title: String(localized: "menu.view.importFromBrowser", defaultValue: "Import Browser Data…"),
-                action: .importBrowserData,
-                accessibilityIdentifier: "SidebarHelpMenuOptionImportBrowserData",
                 isExternalLink: false
             )
             helpOptionButton(

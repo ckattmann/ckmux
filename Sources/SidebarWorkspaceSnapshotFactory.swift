@@ -202,8 +202,26 @@ struct SidebarWorkspaceSnapshotFactory {
             checklistFirstUncheckedText: checklistProgress.firstUncheckedText,
             taskStatusInput: taskStatusInput,
             compactStatusGlyph: compactStatusGlyph,
-            hostTitleSuffix: hostTitleSuffix
+            hostTitleSuffix: hostTitleSuffix,
+            terminalActivity: terminalActivityCounts(orderedPanelIds: orderedPanelIds)
         )
+    }
+
+    private func terminalActivityCounts(orderedPanelIds: [UUID]) -> TerminalActivityCounts {
+        var counts = TerminalActivityCounts()
+        for panelId in orderedPanelIds where workspace.panels[panelId] is TerminalPanel {
+            counts.terminalCount += 1
+            let agentStates = workspace.agentLifecycleStatesByPanelId[panelId] ?? [:]
+            let isWorking = agentStates.isEmpty
+                ? workspace.panelShellActivityStates[panelId] == .commandRunning
+                : agentStates.values.contains { $0 == .running || $0 == .backgroundWorkPending }
+            if isWorking {
+                counts.workingCount += 1
+            } else {
+                counts.idleCount += 1
+            }
+        }
+        return counts
     }
 
     private var presentationKey: SidebarWorkspaceSnapshotBuilder.PresentationKey {

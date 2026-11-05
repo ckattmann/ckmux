@@ -81,7 +81,7 @@ public struct AppCatalogSection: SettingCatalogSection {
 
     public let presentationMode = DefaultsKey<WorkspacePresentationMode>(
         id: "app.minimalMode",
-        defaultValue: .standard,
+        defaultValue: .minimal,
         userDefaultsKey: "workspacePresentationMode"
     )
 

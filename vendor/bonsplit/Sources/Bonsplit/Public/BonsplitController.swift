@@ -353,7 +353,8 @@ public final class BonsplitController {
         isAudioPlaying: Bool? = nil,
         isPinned: Bool? = nil,
         showsRemoteIndicator: Bool? = nil,
-        presence: TabPresence?? = nil
+        presence: TabPresence?? = nil,
+        status: TabStatus?? = nil
     ) {
         guard let (pane, tabIndex) = findTabInternal(tabId) else { return }
         let currentTab = pane.tabs[tabIndex]
@@ -371,7 +372,8 @@ public final class BonsplitController {
             isAudioPlaying.map { currentTab.isAudioPlaying != $0 } ?? false ||
             isPinned.map { currentTab.isPinned != $0 } ?? false ||
             showsRemoteIndicator.map { currentTab.showsRemoteIndicator != $0 } ?? false ||
-            presence.map { currentTab.presence != $0 } ?? false
+            presence.map { currentTab.presence != $0 } ?? false ||
+            status.map { currentTab.status != $0 } ?? false
         guard didChange else { return }
 
         if let title, currentTab.title != title { currentTab.title = title }
@@ -402,6 +404,7 @@ public final class BonsplitController {
             currentTab.showsRemoteIndicator = showsRemoteIndicator
         }
         if let presence, currentTab.presence != presence { currentTab.presence = presence }
+        if let status, currentTab.status != status { currentTab.status = status }
     }
 
     /// Close a tab by ID

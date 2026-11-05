@@ -65,7 +65,12 @@ extension ShortcutAction {
         }
     }
 
+    public static let removedFeatureActions: Set<ShortcutAction> = [
+        .newBrowserWorkspace, .focusLeft, .focusRight, .focusUp, .focusDown, .splitRight, .splitDown, .newPaneAutoLayout, .toggleSplitZoom, .equalizeSplits, .resizePaneLeft, .resizePaneRight, .resizePaneUp, .resizePaneDown, .splitBrowserRight, .splitBrowserDown, .toggleCanvasLayout, .canvasRevealFocusedPane, .canvasOverview, .canvasZoomIn, .canvasZoomOut, .canvasZoomReset, .canvasTidy, .openBrowser, .focusBrowserAddressBar, .browserBack, .browserForward, .browserReload, .browserHardReload, .browserZoomIn, .browserZoomOut, .browserZoomReset, .toggleBrowserDeveloperTools, .showBrowserJavaScriptConsole, .toggleBrowserFocusMode, .toggleBrowserDesignMode, .toggleReactGrab, .simulatorHome, .simulatorRotateLeft, .simulatorRotateRight, .simulatorToggleAppearance, .simulatorToggleSoftwareKeyboard
+    ]
+
     private var builtInDefaultStroke: ShortcutStroke? {
+        if Self.removedFeatureActions.contains(self) { return nil }
         switch self {
         case .openSettings: return ShortcutStroke(key: ",", command: true)
         case .openTeamPicker: return ShortcutStroke(key: "t", command: true, shift: true, option: true)
@@ -90,7 +95,7 @@ extension ShortcutAction {
         case .goToWorkspace: return ShortcutStroke(key: "p", command: true)
         case .commandPalette: return ShortcutStroke(key: "p", command: true, shift: true)
         case .agentInbox: return ShortcutStroke(key: "i", command: true, shift: true)
-        case .openChief: return ShortcutStroke(key: "c", command: true, shift: true)
+        case .showAllTerminals: return ShortcutStroke(key: "a", command: true, shift: true)
         case .commandPaletteNext: return ShortcutStroke(key: "n", control: true)
         case .commandPalettePrevious: return ShortcutStroke(key: "p", control: true)
         case .sendFeedback: return nil
@@ -190,7 +195,7 @@ extension ShortcutAction {
         case .moveWorkspaceDown: return ShortcutStroke(key: "]", command: true, option: true, control: true)
         case .newSurface: return ShortcutStroke(key: "t", command: true)
         case .toggleTerminalCopyMode: return ShortcutStroke(key: "m", command: true, shift: true)
-        case .focusTextBoxInput: return ShortcutStroke(key: "a", command: true, shift: true)
+        case .focusTextBoxInput: return ShortcutStroke(key: "c", command: true, shift: true)
         case .cycleTextBoxSubmitAction: return ShortcutStroke(key: "\t", shift: true)
         case .attachTextBoxFile: return ShortcutStroke(key: "a", command: true, shift: true, option: true)
         case .sendCtrlFToTerminal: return nil

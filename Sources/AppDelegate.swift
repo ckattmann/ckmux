@@ -671,10 +671,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
     weak var tabManager: TabManager?
     weak var notificationStore: TerminalNotificationStore?
     weak var sidebarState: SidebarState?
-#if DEBUG
-#else
-    private(set) var pullRequestProbeService = PullRequestProbeService()
-#endif
 
     /// Notification jump/open navigation, extracted into `CmuxNotifications`. `AppDelegate` is the
     /// composition root: it conforms to every seam (see `AppDelegate+NotificationNavSeams.swift`)
@@ -1416,6 +1412,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
     func application(_ application: NSApplication, open urls: [URL]) {
         #if DEBUG
         #endif
+
+        let promptRequests = urls.compactMap(AgentPromptLaunchRequest.init(url:))
+        if !promptRequests.isEmpty {
+            prepareForExplicitOpenIntentAtStartup()
+            DispatchQueue.main.async { [weak self] in
+                promptRequests.forEach { self?.handleAgentPromptLaunchRequest($0) }
+            }
+        }
 
         let externalFileURLs = externalOpenFileURLs(from: urls)
         let terminalFilePaths = Set<String>()
@@ -5020,20 +5024,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
 
     /// In release builds, once per Mac after the first main window is up. Tests
     /// never see it; debug builds can open it from Help when needed.
-    private func presentCloudWelcomeIfNeeded(over window: NSWindow) {
-#if DEBUG
-        // Keep the first-run welcome available from Help while iterating on the
-        // app, but do not interrupt every development launch with it.
-        return
-#else
-        let env = ProcessInfo.processInfo.environment
-        guard !isRunningUnderXCTestCached, !isRunningUnderXCTest(env), env["CMUX_UI_TEST_MODE"] != "1" else { return }
-        // Next turn of the main loop, so the window is on screen to place it over.
-        DispatchQueue.main.async { [weak self, weak window] in
-            self?.cloudWelcomeWindowController.presentIfNeeded(over: window)
-        }
-#endif
-    }
+    private func presentCloudWelcomeIfNeeded(over window: NSWindow) {}
 
 #if DEBUG
     func sessionSnapshotForTesting(includeScrollback: Bool = false) -> AppSessionSnapshot? {
@@ -5480,9 +5471,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
         windowId: UUID,
         tabManager: TabManager
     ) {
-        // Remote targets and a configured `ui.newWorkspace.action` go through
-        // the shared empty-area path; the plain local case keeps the
-        // owning-window route below.
+        performSidebarEmptyAreaNewWorkspaceAction(tabManager: tabManager)
     }
 
     private func markCommandPaletteOpenRequested(for window: NSWindow?) {
@@ -7610,7 +7599,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
         let context = preferredTabManager.flatMap { mainWindowContext(for: $0) }
             ?? preferredMainWindowContextForWorkspaceCreation(event: event, debugSource: debugSource)
         let manager = context?.tabManager ?? preferredTabManager
-        return performNewWorkspaceCreationAction(
+        return promptingRenameOfNewWorkspace(in: manager) { performNewWorkspaceCreationAction(
             initialSurface: .terminal,
             preferredTabManager: preferredTabManager,
             event: event,
@@ -7622,7 +7611,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
             inheritWorkingDirectoryOverride: staysLocal
                 ? manager.map { shouldInheritWorkingDirectoryForLocalWorkspace(in: $0) }
                 : nil
-        )
+        ) }
+    }
+
+    private func promptingRenameOfNewWorkspace(in tabManager: TabManager?, _ create: () -> Bool) -> Bool {
+        let previousWorkspaceId = tabManager?.selectedTabId
+        guard create() else { return false }
+        DispatchQueue.main.async { [weak self, weak tabManager] in
+            guard let self, let tabManager,
+                  tabManager.selectedTabId != previousWorkspaceId,
+                  let context = self.mainWindowContext(for: tabManager) else { return }
+            tabManager.selectedWorkspace?.offersInitialFolderChoice = true
+            self.requestRenameWorkspaceViaCommandPalette(preferredWindow: self.resolvedWindow(for: context))
+        }
+        return true
     }
 
     /// Creates a local workspace on this Mac, independent of the selected
@@ -7639,7 +7641,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
                 event: event,
                 debugSource: debugSource
             )?.tabManager
-        return performNewWorkspaceCreationAction(
+        return promptingRenameOfNewWorkspace(in: manager) { performNewWorkspaceCreationAction(
             initialSurface: .terminal,
             preferredTabManager: manager,
             event: event,
@@ -7647,7 +7649,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
             skipConfiguredAction: true,
             forceLocal: true,
             inheritWorkingDirectoryOverride: manager.map { shouldInheritWorkingDirectoryForLocalWorkspace(in: $0) }
-        )
+        ) }
     }
 
     private func shouldInheritWorkingDirectoryForLocalWorkspace(in tabManager: TabManager) -> Bool {
@@ -7691,7 +7693,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
                 debugSource: "sidebar.emptyArea"
             )
         }
-        return tabManager.addWorkspaceIfActive(placementOverride: .end) != nil
+        return promptingRenameOfNewWorkspace(in: tabManager) {
+            tabManager.addWorkspaceIfActive(placementOverride: .end) != nil
+        }
     }
 
     /// Whether the window owning `tabManager` has a `ui.newWorkspace.action`.
@@ -12503,10 +12507,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
             return true
         }
 
-        // Open Chief: toggles Home, so the same keys return to the workspace.
-        // When chief.enabled is off the shortcut is not consumed, so the
-        // keystroke still reaches the focused surface.
-        if matchConfiguredShortcut(event: event, action: .openChief) {
+        if matchConfiguredShortcut(event: event, action: .showAllTerminals) {
+            guard let selectionState = mainWindowContext(forShortcutEvent: event, debugSource: "shortcut.showAllTerminals")?
+                .sidebarSelectionState else { return false }
+            selectionState.selection = selectionState.selection == .home ? .tabs : .home
             return true
         }
 

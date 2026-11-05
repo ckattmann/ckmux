@@ -126,6 +126,11 @@ extension Workspace {
     /// single-panel branch did exactly that).
     func applyAutomaticTitle(_ title: String) {
         guard self.title != title else { return }
+#if DEBUG
+        if customTitle != nil {
+            cmuxDebugLog("workspace.title.autoOverCustom workspace=\(id.uuidString.prefix(8)) stack=\(Thread.callStackSymbols.prefix(10).joined(separator: " | "))")
+        }
+#endif
         withAutomaticTitleMutation {
             self.title = title
         }
@@ -236,6 +241,11 @@ extension Workspace {
     @discardableResult
     func setCustomTitle(_ title: String?, source: CustomTitleSource = .user) -> Bool {
         let trimmed = title?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+#if DEBUG
+        if effectiveCustomTitleSource == .user, source != .user || trimmed.isEmpty {
+            cmuxDebugLog("workspace.customTitle.userOverwrite workspace=\(id.uuidString.prefix(8)) source=\(source) clear=\(trimmed.isEmpty) stack=\(Thread.callStackSymbols.prefix(10).joined(separator: " | "))")
+        }
+#endif
         if source == .auto {
             guard !trimmed.isEmpty else { return false }
             if hasCustomTitle, (customTitleSource ?? .user) != .auto { return false }

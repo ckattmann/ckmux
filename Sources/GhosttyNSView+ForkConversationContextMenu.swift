@@ -350,7 +350,7 @@ extension GhosttyNSView {
         )
         submenuItem.image = NSImage(systemSymbolName: "arrow.triangle.branch", accessibilityDescription: nil)
         let submenu = NSMenu()
-        for destination in AgentConversationForkDestination.allCases {
+        for destination in [AgentConversationForkDestination.newTab, .newWorkspace] {
             let item = NSMenuItem(
                 title: destination.settingsTitle,
                 action: #selector(forkCurrentAgentConversation(_:)),

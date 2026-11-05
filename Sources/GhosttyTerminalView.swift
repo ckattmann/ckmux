@@ -7839,7 +7839,7 @@ class GhosttyNSView: NSView, NSUserInterfaceValidations {
         // outside the viewport (so prompt/link hit-testing cannot match).
         if button == GHOSTTY_MOUSE_LEFT {
             if ghostty_surface_has_selection(surface) {
-                _ = ghostty_surface_clear_selection(surface)
+                GhosttyRuntimeCInterop.clearSelection(surface)
             }
             ghostty_surface_mouse_pos(surface, -1, -1, mods)
         }
@@ -9735,40 +9735,6 @@ class GhosttyNSView: NSView, NSUserInterfaceValidations {
             pointerLocation: sendsTerminalPointerEvent ? convert(event.locationInWindow, from: nil) : nil
         )
         menu.addItem(.separator())
-        let splitHorizontallyItem = menu.addItem(
-            withTitle: String(localized: "terminalContextMenu.splitHorizontally", defaultValue: "Split Horizontally"),
-            action: #selector(splitHorizontally(_:)),
-            keyEquivalent: ""
-        )
-        splitHorizontallyItem.target = self
-        applyConfiguredMenuShortcut(KeyboardShortcutSettings.menuShortcut(for: .splitDown), to: splitHorizontallyItem)
-        splitHorizontallyItem.image = NSImage(
-            systemSymbolName: "rectangle.bottomhalf.inset.filled",
-            accessibilityDescription: nil
-        )
-
-        let splitVerticallyItem = menu.addItem(
-            withTitle: String(localized: "terminalContextMenu.splitVertically", defaultValue: "Split Vertically"),
-            action: #selector(splitVertically(_:)),
-            keyEquivalent: ""
-        )
-        splitVerticallyItem.target = self
-        applyConfiguredMenuShortcut(KeyboardShortcutSettings.menuShortcut(for: .splitRight), to: splitVerticallyItem)
-        splitVerticallyItem.image = NSImage(
-            systemSymbolName: "rectangle.righthalf.inset.filled",
-            accessibilityDescription: nil
-        )
-
-        let swapPaneItem = menu.addItem(
-            withTitle: CmuxPaneSwapStrings().swapWithSession,
-            action: #selector(beginPaneSwapSelection(_:)),
-            keyEquivalent: ""
-        )
-        swapPaneItem.target = self
-        swapPaneItem.image = NSImage(
-            systemSymbolName: "arrow.left.arrow.right",
-            accessibilityDescription: nil
-        )
         appendCurrentSurfaceContextMenuItems(to: menu)
         let resetTerminalItem = menu.addItem(
             withTitle: String(localized: "terminalContextMenu.resetTerminal", defaultValue: "Reset Terminal"),

@@ -77,6 +77,10 @@ final class WorkspaceSidebarAgentRuntimeObservationModel {
         notifyChanged()
     }
 
+    func shellActivityDidChange() {
+        notifyChanged()
+    }
+
     private func notifyChanged() {
         changeGeneration &+= 1
         // Termination cleanup arrives through a separate MainActor task. If

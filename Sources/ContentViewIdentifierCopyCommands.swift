@@ -108,6 +108,10 @@ extension ContentView {
         registry.register(commandId: "palette.copyWorkspaceID") { copySelectedWorkspaceIdentifiers(includeRefs: false) }
         registry.register(commandId: "palette.copyWorkspaceIDAndRef") { copySelectedWorkspaceIdentifiers(includeRefs: true) }
         registry.register(commandId: "palette.copyWorkspaceLink") { copySelectedWorkspaceLink() }
+        registry.register(commandId: "palette.copyPaneID") { copyFocusedPaneIdentifier() }
+        registry.register(commandId: "palette.copyPaneLink") { copyFocusedPaneLink() }
+        registry.register(commandId: "palette.copySurfaceID") { copyFocusedSurfaceIdentifier() }
+        registry.register(commandId: "palette.copySurfaceLink") { copyFocusedSurfaceLink() }
         registry.register(commandId: "palette.copyIdentifiers") {
             copyFocusedWorkspacePaneSurfaceIdentifiers(
             )

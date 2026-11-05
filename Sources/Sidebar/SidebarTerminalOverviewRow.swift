@@ -2,10 +2,15 @@ import CmuxFoundation
 import SwiftUI
 
 struct SidebarTerminalOverviewRow: View {
-    let isSelected: Bool
-    let onSelect: () -> Void
+    @EnvironmentObject private var sidebarSelectionState: SidebarSelectionState
     @Environment(\.cmuxAccentColor) private var cmuxAccent
     @State private var isHovered = false
+
+    private var isSelected: Bool { sidebarSelectionState.selection == .home }
+
+    private func onSelect() {
+        sidebarSelectionState.selection = isSelected ? .tabs : .home
+    }
 
     var body: some View {
         HStack(spacing: 8) {
@@ -31,6 +36,7 @@ struct SidebarTerminalOverviewRow: View {
         .padding(.top, 4)
         .frame(height: SidebarWorkspaceListMetrics.terminalOverviewRowHeight, alignment: .top)
         .accessibilityElement(children: .combine)
+        .accessibilityAction(.default) { onSelect() }
         .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
         .accessibilityIdentifier("SidebarTerminalOverviewRow")
     }

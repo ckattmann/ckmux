@@ -4,6 +4,7 @@ public enum SocketPathMarkerFiles {
     /// The stable release bundle identifier used for machine-wide discovery.
     public static let stableBundleIdentifier = "com.cmuxterm.app"
     public static let stableMarkerFileName = "last-socket-path"
+    public static let ckmuxBundleIdentifier = "com.chka.ckmux"
     public static let stableTmpPath = "/tmp/cmux-last-socket-path"
     public static let nightlyBundleIdentifier = "com.cmuxterm.app.nightly"
     public static let rcBundleIdentifier = "com.cmuxterm.app.rc"
@@ -49,6 +50,9 @@ public enum SocketPathMarkerFiles {
         baseDebugBundleIdentifier: String = defaultBaseDebugBundleIdentifier
     ) -> SocketPathVariant {
         let bundleId = bundleIdentifier?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        if bundleId == ckmuxBundleIdentifier {
+            return .dev(slug: "ckmux-app")
+        }
         if bundleId == nightlyBundleIdentifier {
             return .nightly(slug: nil)
         }

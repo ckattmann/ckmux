@@ -1207,11 +1207,8 @@ struct TabBarView: View {
         .frame(height: tabBarHeight, alignment: .topLeading)
     }
 
-    var body: some View {
-        let _ = controller.internalController.recordTabBarRender(
-            paneId: pane.id,
-            tabCount: pane.tabs.count
-        )
+    @ViewBuilder
+    private var scrollingTabStrip: some View {
         HStack(spacing: 0) {
             if appearance.tabBarLeadingInset > 0 && controller.internalController.rootNode.allPaneIds.first == pane.id {
                 TabBarDragZoneView(
@@ -1292,6 +1289,62 @@ struct TabBarView: View {
                         .frame(width: splitButtonsBackdropWidth, height: tabBarHeight)
                 }
                 .clipped()
+        }
+    }
+
+    @ViewBuilder
+    private var wrappedTabRows: some View {
+        HStack(alignment: .top, spacing: TabBarMetrics.pillSpacing) {
+            if appearance.tabBarLeadingInset > 0 && controller.internalController.rootNode.allPaneIds.first == pane.id {
+                Color.clear
+                    .frame(width: appearance.tabBarLeadingInset, height: TabBarMetrics.pillHeight)
+            }
+            TabRowWrapLayout(spacing: TabBarMetrics.pillSpacing, rowSpacing: TabBarMetrics.pillRowSpacing) {
+                ForEach(pinnedTabEntries + scrollableTabEntries, id: \.tab.id) { entry in
+                    tabItem(for: entry.tab, at: entry.index, fillsWidth: false)
+                        .id(entry.tab.id)
+                }
+                dropZoneAfterTabs
+                    .frame(height: TabBarMetrics.pillHeight)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            if shouldRenderSplitButtons {
+                splitButtonRow
+                    .fixedSize()
+                    .frame(height: TabBarMetrics.pillHeight)
+                    .saturation(tabBarSaturation)
+                    .opacity(shouldShowSplitButtons ? 1 : 0)
+                    .allowsHitTesting(shouldShowSplitButtons)
+                    .tabBarButtonAnimationsDisabled()
+            }
+        }
+        .padding(.horizontal, TabBarMetrics.pillBarHorizontalPadding)
+        .padding(.vertical, TabBarMetrics.pillBarVerticalPadding)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background {
+            TabBarDragZoneView(
+                isMinimalMode: isMinimalMode,
+                isFocusedPane: isFocused,
+                onSingleClick: focusPaneFromTabBarChrome
+            ) {
+                performNewTerminalSplitButtonAction()
+            }
+        }
+        .coordinateSpace(name: "tabBar")
+        .background(TabBarLayerBackedColor(color: chromeSnapshot.barColor))
+    }
+
+    var body: some View {
+        let _ = controller.internalController.recordTabBarRender(
+            paneId: pane.id,
+            tabCount: pane.tabs.count
+        )
+        Group {
+            if appearance.wrapsTabsIntoRows {
+                wrappedTabRows
+            } else {
+                scrollingTabStrip
+            }
         }
         .background(dragAndHoverBackground)
         .overlay(
