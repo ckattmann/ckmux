@@ -24,6 +24,8 @@ struct TerminalOverviewView: View {
     @State private var filterText = ""
     @AppStorage("terminalOverview.arrangement") private var arrangement: TerminalOverviewArrangement = .byWorkspace
 
+    private static let contentMaxWidthPt: CGFloat = 960
+
     var body: some View {
         VStack(spacing: 0) {
             header
@@ -34,6 +36,8 @@ struct TerminalOverviewView: View {
                 }
                 .padding(.horizontal, 20)
                 .padding(.bottom, 20)
+                .frame(maxWidth: Self.contentMaxWidthPt)
+                .frame(maxWidth: .infinity)
             }
         }
         .background(Color(nsColor: .windowBackgroundColor))
@@ -124,6 +128,8 @@ struct TerminalOverviewView: View {
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
+        .frame(maxWidth: Self.contentMaxWidthPt)
+        .frame(maxWidth: .infinity)
     }
 
     private func sectionHeader(_ section: TerminalOverviewWorkspaceSection) -> some View {
