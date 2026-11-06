@@ -34,6 +34,8 @@ build_configuration() {
     -derivedDataPath "$DERIVED" \
     CMUX_GHOSTTYKIT_PREPROVISIONED=1 \
     CMUX_SKIP_ZIG_BUILD=1 \
+    ARCHS=arm64 \
+    ONLY_ACTIVE_ARCH=YES \
     build "$@" \
     | grep -E 'error:|warning: unre|BUILD (SUCCEEDED|FAILED)|\*\* ' || true
 }
