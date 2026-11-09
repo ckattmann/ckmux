@@ -72,7 +72,7 @@ struct TerminalSessionLinksBar: View {
 
     var body: some View {
         let links = store.links(for: panelId)
-        Group {
+        VStack(spacing: 0) {
             if !links.isEmpty {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 6) {
